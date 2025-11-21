@@ -1,0 +1,3 @@
+```{r machine-info, echo=FALSE, results='asis'}
+cat("**Machine:**", paste0(Sys.info()['nodename'], " - ", Sys.info()['sysname'], " ", Sys.info()['release']), "\n\n")
+```
