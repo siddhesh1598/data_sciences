@@ -1,0 +1,295 @@
+---
+title: "Introduction to Data Analytics 1"
+author: "Siddhesh Shinde"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  word_document:
+    reference_docx: default
+---
+
+```{r machine-info, echo=FALSE, results='asis'}
+cat("**Machine:**", paste0(Sys.info()['nodename'], " - ", Sys.info()['sysname'], " ", Sys.info()['release']), "\n\n")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Set machine info for document
+machine_info <- paste0(Sys.info()['nodename'], ' - ', Sys.info()['sysname'], ' ', Sys.info()['release'])
+```
+
+# Part 1: Variables, Hypothesis, Designs
+
+*Title:* Offshore outsourcing: Its advantages, disadvantages, and effect on the American economy
+
+*Abstract*: The United States has trained some of the world's best computer programmers and technology experts. Despite all of this training, many businesses do not have a full understanding of information technology. As the importance of technology in the business world grows, many companies are wasting money on extensive technology projects. When problems arise, they expect that further investment will solve these issues. To prevent such problems, many companies have begun to outsource these functions in an effort to reduce costs and improve performance. The majority of these outsourced information technology and call center jobs are going to low-wage countries, such as India and China where English-speaking college graduates are being hired at substantially lower wages. The purpose of this study is to evaluate the positive and negative aspects of offshore outsourcing with a focus on the outsourcing markets in India and China, arguably the two most popular destinations for outsourcers. The cost savings associated with offshore outsourcing will be evaluated in relation to the security risks and other weakness of offshore outsourcing. In addition, an analysis of the number of jobs sent overseas versus the number of jobs created in the United States will be used to assess the effects that outsourcing is having on the American economy and job market. Finally, the value of jobs lost from the American economy will be compared to the value of jobs created. The goal of these analyses is to create a clear picture of this increasingly popular business strategy.
+
+Answer the following questions about the abstract above:
+
+1)	What is a potential hypothesis of the researchers?
+
+A potential hypothesis of the researchers could be: "Offshore outsourcing of information technology and call center jobs to low-wage countries reduce cost for American businesses but negatively impacts American economy and job market"
+
+2)	What is one of the independent variables?
+
+The percentage of offshore outsourcing jobs could be one of the independent variables.
+
+    a.	What type of variable is the independent variable?
+    
+    This is a Continuous Variable, especially Ratio Variable since it has a true zero
+
+3)	What is one of the dependent variables?
+
+The number of jobs created or lost in America could be one of the dependent variables.
+
+    a.	What type of variable is the dependent variable?
+
+    This is a Continuous Variable, especially Ratio Variable since it has a true zero
+    
+4)	What might cause some measurement error in this experiment?
+
+Error may be caused in classifying whether a job is lost to offshore outsourcing or eliminated due to other reasons.
+
+5)	What type of research design is the experiment?
+
+This is a Correlational research design.
+
+    a.	Why?
+    
+    The design described in the abstract matched the Correlational deign method: Observing what naturally goes on in the world without directly interfering with it. The study aims to analyze existing data to evaluate relationship between offshore outsourcing and outcomes like job loss/economic impact, without changing variables.
+
+6)	How might you measure the reliability of your dependent variable?
+
+I would use Test-Retest Reliability to test the consistency of employment statistics across time.
+
+7)	Is this study ecologically valid?
+
+Yes, this test is ecologically valid since it uses real-world scenario and conditions such as actual business practices, economic data and outcome. 
+
+8)	Can this study claim cause and effect?
+
+No, this study cannot claim cause and effect.
+
+    a.	Why/why not?
+
+    Because this case study uses Correlational Research method without directly changing the variables, we can only infer coorelation and not causation.  
+
+9)	What type of data collection did the researchers use (please note that #5 is a different question)?
+
+The researchers have used Between-group/between-subject/independent method as they are comparing a set of data from different businesses and not by observing repeated measures over time. 
+
+
+# Part 2: Use the assessment scores dataset (03_lab.csv) to answer these questions.
+
+The provided dataset includes the following information created to match the abstract:
+
+- Jobs: the percent of outsourced jobs for a call center.
+- Cost: one calculation of the cost savings for the business.
+- Cost2: a separate way to calculate cost savings for the business.
+- ID: an ID number for each business.
+- Where: where the jobs were outsourced to. 
+
+Calculate the following information:
+
+1)	Create a frequency table of the percent of outsourced jobs.
+
+I have used `read.csv()` to load the csv.
+Used `cut()` to divide the jobs variable (percentage value from 0 to 100) into intervals of 10
+Used `table()` to plot the `jobs_cut` that I calculated using `cut()`
+
+```{r}
+# Load data
+data <- read.csv("03_data.csv")
+
+# Get interval of percent of outsources jobs 
+jobs_cut <- cut(data$jobs, breaks = seq(0, 100, by = 10))
+
+# Create table
+table(jobs_cut)
+```
+
+2)	Create histograms of the two types of cost savings. You will want to add the breaks argument to the hist() function. This argument adds more bars to the histogram, which makes it easier to answer the following questions:
+
+`hist(dataset$column, breaks = 15)` 
+
+15 is a great number to pick, but it can be any number. For this assignment, try 15 to see a medium number of bars. 
+
+I have used `mean()`, `skewness()` and `kurtosis()` function to calculate required information. We require `moments` library to calculate skewness and kurtosis.
+I have used `hist()` function to plot `data$cost` and `data$cost2` variables with 15 breaks and plotting their mean values on the plots using `abline()`.
+
+```{r}
+library(moments)
+
+# --- cost variable --- 
+cat("\nFor 'cost' variable: \n")
+
+# data calculation
+mean_cost <- mean(data$cost)
+skewness_cost <- skewness(data$cost)
+kurtosis_cost <- kurtosis(data$cost)
+
+cat("Skewness:", round(skewness_cost, 3), "\n")
+cat("Interpretation:", 
+    ifelse(abs(skewness_cost) < 0.5, "Approximately Symmetric",
+           ifelse(skewness_cost > 0, "Right-skewed (Positive)", "Left-skewed (Negative)")), "\n\n")
+
+cat("Kurtosis:", round(kurtosis_cost, 3), "\n")
+cat("Interpretation:",
+    ifelse(kurtosis_cost > 3, "Leptokurtic (heavy tails)",
+           ifelse(kurtosis_cost < 3, "Platykurtic (light tails)", "Mesokurtic (normal)")), "\n")
+
+# plotting
+hist(
+  data$cost,
+  breaks=15,
+  main = "Histogram of Cost Savings (Method 1)",
+  xlab = "Cost Savings",
+  ylab = "Frequency",
+  col = "lightblue",
+  border = "black"
+)
+abline(v = mean_cost, col = "red", lwd = 3, lty = 2)
+legend("topright", legend = paste("Mean =", round(mean_cost, 2)),
+       col = "red", lty = 2, lwd = 3)
+
+
+# --- cost2 variable --- 
+cat("\nFor 'cost2' variable: \n")
+
+# data calculation
+mean_cost2 <- mean(data$cost2)
+skewness_cost2 <- skewness(data$cost2)
+kurtosis_cost2 <- kurtosis(data$cost2)
+
+cat("Skewness:", round(skewness_cost2, 3), "\n")
+cat("Interpretation:", 
+    ifelse(abs(skewness_cost2) < 0.5, "Approximately Symmetric",
+           ifelse(skewness_cost2 > 0, "Right-skewed (Positive)", "Left-skewed (Negative)")), "\n\n")
+
+cat("Kurtosis:", round(kurtosis_cost2, 3), "\n")
+cat("Interpretation:",
+    ifelse(kurtosis_cost2 > 3, "Leptokurtic (heavy tails)",
+           ifelse(kurtosis_cost2 < 3, "Platykurtic (light tails)", "Mesokurtic (normal)")), "\n")
+
+# plotting
+hist(
+  data$cost2,
+  breaks=15,
+  main = "Histogram of Cost Savings (Method 2)",
+  xlab = "Cost Savings",
+  ylab = "Frequency",
+  col = "lightgreen",
+  border = "black",
+)
+abline(v = mean_cost2, col = "red", lwd = 3, lty = 2)
+legend("topright", legend = paste("Mean =", round(mean_cost2, 2)),
+       col = "red", lty = 2, lwd = 3)
+```
+
+3)	Examine these histograms to answer the following questions:
+
+    a.	Which cost savings appears the most normal?
+    
+    'cost' savings appear to be most normal since it has a skewness value of -0.002 as compared to skewness score of 0.159 for 'cost2'
+    
+    b.	Which cost savings data is multimodal?
+    
+    Neither of the methods are multimodal since both have a single peak
+    
+    c.	Which cost savings data looks the most skewed (and in which direction positive or negative)?  
+    
+    'cost2' method looks more skewed in the positive direction as it has a skewness score of 0.159 as compared to -0.002 skewness of 'cost'
+    
+    d.	Which cost savings data looks the most kurtotic?
+    
+    'cost2' method looks more kurtotic with a kurtosis score of 3.775 as compared to 2.426 kurtosis score for 'cost' method
+    
+4)	Calculate the z-scores for each cost savings, so they are all on the same scale.
+
+I have used `scale()` function to get z-scores for each saving and stored them in `cost_z` and `cost2_z` columns of data
+
+```{r}
+# z-scores for cost (Method 1)
+data$cost_z <- scale(data$cost)
+
+# z-scores for cost2 (Method 2)
+data$cost2_z <- scale(data$cost2)
+
+head(data)
+```
+
+6)	How many of the cost saving scores were more extreme than 95% of the data (i.e., number of z-scores at a *p* < .05)?
+
+For a two-tailed test at p < .05, critical values are ±1.96. So, we calculate the sum of absolute values of z-scores > 1.96.
+
+```{r}
+# extreme z-scores for cost
+cost_extreme <- sum(abs(data$cost_z) > 1.96)
+
+# extreme z-scores for cost2
+cost2_extreme <- sum(abs(data$cost2_z) > 1.96)
+
+# Total extreme scores across both variables
+total_extreme <- cost_extreme + cost2_extreme
+
+print(cost_extreme)
+print(cost2_extreme)
+print(total_extreme)
+```
+
+    a.	Cost Savings 1: 
+    
+    There are 10 cost saving scores more extrene than 95% of data for 'cost' method
+    
+    c.	Cost Savings 2: 
+    
+    There are 13 cost saving scores more extrene than 95% of data for 'cost' method
+    
+7)	Which business had:
+
+
+I have used `which.max()` and `which.min()` functions to get the max and min values of the variables respectively and used that to conditionally index `data` and printing desired columns using `c()`.
+For calculating the highest and lowest z-scores across both columns, we first need to know the min and max values of cost_z and cost2_z and based on that, we similarly index the data to get highest and lowest z-scores.
+
+```{r}
+# Calculating business with highest cost savings
+data[which.max(data$cost), c("id", "cost", "cost_z")]
+data[which.max(data$cost2), c("id", "cost2", "cost2_z")]
+
+# Calculating business with lowest cost savings
+data[which.min(data$cost), c("id", "cost", "cost_z")]
+data[which.min(data$cost2), c("id", "cost2", "cost2_z")]
+
+# Calculating highest and lowest z-scores across both columns
+max_cost_z <- max(data$cost_z)
+max_cost2_z <- max(data$cost2_z)
+min_cost_z <- min(data$cost_z)
+min_cost2_z <- min(data$cost2_z)
+
+if (max_cost_z > max_cost2_z) {
+  data[which.max(data$cost_z), c("id", "cost_z")]
+} else {
+  data[which.max(data$cost2_z), c("id", "cost2_z")]
+}
+
+if(min_cost_z < min_cost2_z) {
+  data[which.min(data$cost_z), c("id", "cost_z")]
+} else {
+  data[which.min(data$cost2_z), c("id", "cost2_z")]
+}
+```
+
+    a.	the highest cost savings?
+    
+    The highest cost saving for 'cost' method is for business with id S100 with cost 708.9968	
+    The highest cost saving for 'cost2' method is for business with id S097 with cost2 566.3174	
+        
+    b.	the the lowest cost savings?
+    
+    The lowest cost saving for 'cost' method is for business with id S190 with cost 647.0521	
+    The lowest cost saving for 'cost2' method is for business with id S092 with cost2 493.5102	
+        
+    c.  Use both cost savings columns and find the ID number of the business with the lowest and highest z-score.
+    
+    The highest z-score across both cost methods is for business with id S097 with cost2_z 3.085539	
+    The lowest z-score across both cost methods is for business with id S092 with cost2_z -2.92971		
