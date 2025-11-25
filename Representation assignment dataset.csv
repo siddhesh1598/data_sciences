@@ -1,0 +1,501 @@
+Age,Income,Gender,Race,Customer_Satisfaction,Loan_Approval,Marital_Status,Education_Level,Job_Title,Residence_Type,Number_of_Children,Health_Rating,Travel_Frequency,Vehicle_Ownership,Internet_Usage_Hours,Phone_Usage_Hours,Shopping_Frequency,Dietary_Preferences,Political_Orientation,Credit_Score
+56,23343,Female,Asian,1,0,Widowed,Bachelor,Artist,Urban,0,1,Rarely,1,2,3,Daily,Non-Vegetarian,Right,520
+69,33500,Female,Hispanic,3,1,Widowed,Bachelor,Engineer,Suburban,4,2,Never,1,5,3,Rarely,Vegetarian,Left,372
+46,73222,Female,White,2,0,Married,Bachelor,Clerk,Suburban,0,4,Rarely,1,2,1,Monthly,Vegan,Right,345
+32,49375,Female,Other,4,1,Single,Bachelor,Doctor,Suburban,1,6,Never,1,3,0,Monthly,Vegetarian,Center,803
+60,29662,Female,Hispanic,4,1,Widowed,High School,Manager,Rural,4,8,Often,1,0,0,Daily,Non-Vegetarian,Right,573
+25,36964,Male,Hispanic,2,0,Divorced,Master,Artist,Suburban,0,3,Never,1,4,4,Weekly,Vegan,Right,507
+38,79638,Male,White,4,1,Widowed,Bachelor,Doctor,Suburban,2,1,Rarely,0,0,4,Weekly,Vegan,Right,423
+56,93666,Female,Black,5,0,Married,Master,Engineer,Urban,3,3,Always,0,0,1,Weekly,Vegetarian,Right,309
+36,87215,Non-binary,Asian,5,1,Single,Bachelor,Artist,Urban,3,3,Often,0,9,0,Rarely,Non-Vegetarian,Right,628
+40,89042,Male,Black,5,1,Married,Bachelor,Doctor,Urban,2,5,Rarely,0,6,1,Daily,Vegetarian,Left,486
+28,33284,Female,Other,1,1,Divorced,High School,Artist,Rural,1,4,Often,1,5,4,Daily,Vegetarian,Center,842
+28,92789,Female,Hispanic,2,1,Divorced,PhD,Clerk,Suburban,4,4,Often,0,1,4,Weekly,Non-Vegetarian,Left,359
+41,81389,Female,White,1,1,Divorced,PhD,Clerk,Urban,3,9,Rarely,0,1,3,Weekly,Non-Vegetarian,Center,741
+53,29435,Female,White,4,0,Married,High School,Manager,Urban,2,7,Rarely,0,6,1,Never,Vegetarian,Center,516
+57,74340,Female,Asian,1,0,Widowed,Master,Manager,Urban,2,4,Always,0,0,1,Never,Vegan,Center,301
+41,64078,Female,Black,4,0,Married,PhD,Clerk,Suburban,1,3,Often,1,1,0,Monthly,Vegetarian,Center,835
+20,98832,Female,Asian,4,0,Single,High School,Artist,Suburban,1,6,Often,1,7,0,Monthly,Vegan,Center,655
+39,71293,Male,Hispanic,3,1,Widowed,High School,Clerk,Suburban,0,3,Rarely,1,5,3,Daily,Vegetarian,Right,464
+19,98781,Female,Asian,5,1,Divorced,PhD,Manager,Rural,3,6,Never,0,1,2,Daily,Non-Vegetarian,Left,390
+41,80403,Male,White,4,1,Married,Master,Clerk,Rural,0,9,Rarely,0,6,2,Rarely,Vegan,Left,466
+61,49124,Male,White,3,0,Divorced,High School,Clerk,Urban,2,6,Often,0,3,2,Rarely,Non-Vegetarian,Right,506
+47,63919,Female,Other,5,1,Divorced,Bachelor,Artist,Suburban,4,4,Rarely,1,1,1,Never,Non-Vegetarian,Center,581
+55,55247,Male,Other,4,1,Single,Master,Doctor,Urban,4,5,Always,0,5,1,Monthly,Non-Vegetarian,Left,364
+19,82752,Male,Hispanic,4,0,Widowed,Master,Manager,Suburban,1,6,Never,1,8,4,Never,Non-Vegetarian,Right,815
+38,76573,Female,Black,1,1,Single,PhD,Artist,Suburban,4,3,Rarely,0,8,1,Never,Non-Vegetarian,Right,456
+50,79101,Male,Asian,1,1,Single,PhD,Clerk,Suburban,4,8,Always,1,7,1,Monthly,Vegetarian,Left,605
+29,46646,Male,Hispanic,5,0,Single,Bachelor,Clerk,Rural,4,4,Often,0,2,1,Rarely,Vegan,Left,694
+39,43049,Female,Other,4,1,Divorced,High School,Doctor,Rural,2,8,Rarely,0,2,3,Monthly,Vegetarian,Center,373
+61,99605,Female,Asian,2,1,Single,PhD,Manager,Suburban,4,3,Often,1,1,1,Weekly,Vegetarian,Center,486
+42,88385,Male,Other,1,0,Single,PhD,Manager,Urban,4,7,Always,0,4,0,Weekly,Vegetarian,Left,636
+66,60158,Female,Asian,5,1,Widowed,Master,Engineer,Suburban,4,9,Often,0,3,0,Weekly,Non-Vegetarian,Center,539
+44,85417,Female,Black,4,1,Widowed,PhD,Manager,Suburban,0,4,Always,1,6,4,Daily,Vegetarian,Right,832
+59,43289,Female,Hispanic,4,1,Single,PhD,Doctor,Urban,2,8,Always,1,3,3,Rarely,Vegan,Center,440
+45,29823,Female,Asian,2,1,Widowed,PhD,Engineer,Suburban,1,3,Always,1,8,0,Rarely,Vegetarian,Center,564
+33,80160,Non-binary,White,5,1,Widowed,PhD,Engineer,Urban,0,7,Rarely,0,1,3,Daily,Non-Vegetarian,Right,438
+32,61975,Female,White,4,1,Single,Master,Clerk,Rural,3,3,Often,0,5,3,Never,Vegan,Center,758
+64,29540,Female,Asian,1,1,Divorced,Bachelor,Clerk,Rural,2,7,Often,0,6,4,Weekly,Vegan,Right,369
+68,36364,Female,Asian,2,0,Single,Bachelor,Manager,Urban,2,6,Never,0,3,3,Weekly,Vegan,Center,684
+61,24611,Male,Asian,5,1,Widowed,High School,Engineer,Rural,3,2,Never,1,5,1,Never,Vegan,Left,497
+69,47663,Male,White,2,1,Divorced,PhD,Clerk,Rural,3,3,Never,1,6,3,Monthly,Vegetarian,Center,504
+20,71991,Female,White,1,1,Married,Master,Doctor,Urban,3,6,Never,0,3,4,Monthly,Non-Vegetarian,Left,730
+54,77679,Female,Asian,5,0,Divorced,High School,Clerk,Rural,1,4,Often,1,7,4,Rarely,Vegan,Left,624
+68,50977,Female,Other,2,1,Widowed,High School,Clerk,Suburban,4,6,Always,0,8,4,Daily,Vegan,Left,741
+24,69115,Male,Other,3,0,Divorced,Bachelor,Engineer,Suburban,2,1,Always,1,0,0,Rarely,Non-Vegetarian,Left,587
+38,80890,Female,Black,1,0,Single,Master,Engineer,Urban,4,1,Rarely,0,6,1,Monthly,Vegetarian,Left,525
+26,86387,Male,Hispanic,1,0,Married,Master,Artist,Rural,4,3,Always,0,8,0,Never,Vegan,Right,363
+56,38071,Female,Other,1,1,Married,Master,Doctor,Suburban,3,8,Often,1,9,2,Rarely,Vegetarian,Right,797
+35,79275,Female,White,3,1,Married,Bachelor,Engineer,Suburban,1,8,Often,1,4,1,Weekly,Vegetarian,Right,359
+21,92369,Female,Other,3,1,Widowed,Bachelor,Manager,Rural,0,4,Often,1,1,3,Weekly,Vegetarian,Left,696
+42,31938,Female,Black,4,0,Widowed,Bachelor,Doctor,Rural,1,6,Rarely,0,9,4,Never,Vegetarian,Center,556
+31,55195,Female,Black,2,1,Married,Bachelor,Doctor,Suburban,4,8,Never,0,5,2,Monthly,Vegan,Right,538
+67,24000,Male,Hispanic,4,1,Divorced,Bachelor,Engineer,Suburban,1,7,Always,0,6,1,Weekly,Vegan,Center,337
+26,90588,Female,Other,2,1,Married,PhD,Doctor,Urban,3,7,Often,0,1,0,Weekly,Vegetarian,Center,324
+43,58304,Male,White,3,0,Divorced,PhD,Engineer,Urban,0,4,Often,1,1,4,Daily,Vegetarian,Left,709
+19,89449,Female,White,3,1,Divorced,Master,Clerk,Suburban,3,9,Never,0,9,0,Rarely,Non-Vegetarian,Left,760
+37,40764,Female,Asian,4,1,Widowed,High School,Artist,Urban,0,6,Often,0,9,1,Monthly,Non-Vegetarian,Left,716
+45,58494,Female,White,5,1,Divorced,Master,Clerk,Suburban,4,3,Always,1,0,1,Rarely,Non-Vegetarian,Right,656
+64,23373,Female,Hispanic,4,0,Married,High School,Engineer,Suburban,0,5,Rarely,0,3,2,Monthly,Vegan,Left,682
+24,32161,Female,Hispanic,2,0,Widowed,Bachelor,Engineer,Urban,0,5,Often,1,6,3,Weekly,Non-Vegetarian,Right,457
+61,47350,Non-binary,White,4,1,Single,High School,Clerk,Urban,0,5,Always,1,8,0,Daily,Vegan,Right,732
+25,45351,Male,White,1,1,Single,Master,Manager,Rural,1,8,Often,0,2,2,Rarely,Vegan,Right,347
+64,35305,Male,Asian,2,1,Widowed,Master,Manager,Rural,1,9,Never,1,6,4,Weekly,Vegan,Right,627
+52,95353,Male,White,2,1,Married,High School,Manager,Rural,4,9,Often,1,6,3,Monthly,Vegan,Left,732
+31,96797,Male,Asian,5,0,Single,PhD,Engineer,Suburban,0,6,Often,0,6,2,Rarely,Non-Vegetarian,Right,730
+34,85953,Female,Asian,3,1,Single,Bachelor,Doctor,Urban,2,6,Rarely,0,1,0,Rarely,Vegetarian,Left,355
+53,77458,Non-binary,White,2,1,Divorced,Bachelor,Engineer,Suburban,4,9,Never,0,5,1,Weekly,Vegetarian,Left,567
+67,40358,Male,Black,3,1,Divorced,Master,Doctor,Urban,0,4,Never,1,1,4,Rarely,Vegetarian,Right,368
+57,23267,Male,Black,4,1,Married,PhD,Clerk,Suburban,0,6,Rarely,1,5,0,Daily,Non-Vegetarian,Left,748
+21,58513,Male,Asian,1,1,Widowed,High School,Artist,Rural,1,4,Often,1,9,3,Daily,Vegetarian,Center,556
+19,46092,Female,White,5,0,Married,Bachelor,Doctor,Rural,4,1,Always,1,2,3,Weekly,Non-Vegetarian,Left,789
+23,31338,Female,Black,3,1,Widowed,PhD,Manager,Rural,0,7,Never,1,1,1,Monthly,Non-Vegetarian,Left,348
+59,20412,Male,White,2,0,Single,Bachelor,Engineer,Suburban,0,6,Never,1,5,1,Weekly,Non-Vegetarian,Right,615
+21,27543,Non-binary,White,3,1,Divorced,PhD,Clerk,Urban,4,9,Often,0,1,4,Daily,Vegetarian,Right,712
+46,53496,Female,White,2,1,Married,PhD,Manager,Urban,2,7,Often,1,4,4,Never,Vegetarian,Left,733
+35,80692,Male,Other,3,1,Married,Master,Clerk,Rural,4,7,Never,0,1,1,Never,Vegetarian,Right,301
+43,64425,Female,White,2,1,Widowed,Bachelor,Artist,Rural,4,2,Often,1,2,1,Rarely,Vegan,Center,444
+61,58756,Female,Other,4,1,Widowed,High School,Engineer,Rural,2,9,Always,0,2,3,Rarely,Non-Vegetarian,Center,665
+51,38888,Male,Asian,2,1,Married,Master,Engineer,Rural,4,9,Never,0,5,1,Never,Vegan,Right,719
+27,55735,Male,Black,2,1,Widowed,Master,Artist,Urban,0,6,Always,0,5,2,Daily,Non-Vegetarian,Left,743
+53,67295,Male,Black,1,0,Married,High School,Engineer,Suburban,4,3,Always,0,9,0,Rarely,Vegetarian,Center,733
+31,37955,Male,Black,2,1,Married,Master,Doctor,Suburban,2,1,Often,1,2,1,Weekly,Non-Vegetarian,Center,356
+48,57841,Female,Black,1,1,Married,PhD,Clerk,Suburban,3,4,Always,0,2,4,Weekly,Non-Vegetarian,Left,477
+65,90640,Non-binary,Black,5,1,Single,PhD,Manager,Suburban,4,3,Often,1,0,2,Daily,Vegan,Right,592
+32,85510,Male,Black,1,1,Widowed,Bachelor,Artist,Rural,1,1,Rarely,0,6,4,Rarely,Non-Vegetarian,Center,345
+25,54911,Male,Black,4,1,Divorced,Bachelor,Doctor,Rural,0,3,Often,1,7,2,Weekly,Vegetarian,Left,469
+31,79031,Male,Asian,1,0,Divorced,High School,Manager,Rural,0,4,Always,0,1,1,Rarely,Non-Vegetarian,Left,570
+40,27357,Male,White,5,1,Widowed,Bachelor,Manager,Suburban,1,8,Rarely,0,3,0,Rarely,Non-Vegetarian,Center,716
+57,52479,Female,Hispanic,4,0,Married,PhD,Artist,Rural,1,9,Often,1,9,4,Weekly,Non-Vegetarian,Right,438
+38,81476,Male,Other,3,0,Divorced,High School,Doctor,Rural,4,3,Always,0,6,2,Never,Vegan,Center,546
+33,64811,Male,Hispanic,3,0,Divorced,High School,Manager,Urban,1,6,Never,0,7,3,Weekly,Non-Vegetarian,Left,447
+62,56208,Male,Hispanic,1,1,Widowed,Bachelor,Manager,Urban,3,5,Never,0,0,1,Daily,Non-Vegetarian,Center,529
+35,40150,Female,White,1,1,Divorced,PhD,Doctor,Rural,2,6,Often,0,3,0,Monthly,Vegan,Right,673
+64,91180,Male,White,5,0,Married,High School,Engineer,Urban,1,4,Often,1,5,1,Weekly,Vegan,Left,379
+41,63286,Female,White,5,1,Widowed,PhD,Manager,Urban,1,6,Never,0,2,3,Rarely,Vegan,Right,364
+43,88450,Male,Black,2,1,Married,PhD,Clerk,Rural,3,7,Always,1,4,0,Rarely,Vegan,Center,387
+42,41352,Female,Asian,5,0,Divorced,PhD,Doctor,Rural,0,9,Always,1,9,3,Weekly,Vegetarian,Center,387
+62,75069,Female,Black,2,1,Divorced,Bachelor,Manager,Rural,0,7,Always,0,8,1,Monthly,Vegetarian,Right,503
+58,34397,Male,Asian,4,1,Married,Master,Artist,Rural,4,6,Often,1,2,2,Weekly,Non-Vegetarian,Center,681
+46,61555,Male,Asian,1,1,Single,Master,Clerk,Suburban,3,1,Rarely,1,4,1,Monthly,Vegetarian,Right,775
+32,66959,Female,Hispanic,4,1,Divorced,High School,Manager,Suburban,2,2,Rarely,1,7,1,Monthly,Non-Vegetarian,Center,838
+62,20728,Non-binary,Hispanic,5,1,Single,PhD,Clerk,Rural,2,1,Rarely,1,5,1,Daily,Vegetarian,Right,513
+18,70517,Female,Asian,4,1,Divorced,Bachelor,Clerk,Urban,3,9,Rarely,1,3,4,Rarely,Vegan,Right,373
+42,86234,Female,Asian,4,1,Single,PhD,Engineer,Rural,2,9,Rarely,1,7,3,Rarely,Vegan,Left,360
+24,59954,Non-binary,Black,4,1,Single,PhD,Clerk,Rural,0,7,Often,0,2,3,Monthly,Vegetarian,Left,842
+26,67280,Female,Black,5,0,Single,Bachelor,Engineer,Urban,2,2,Often,0,2,3,Rarely,Vegetarian,Right,518
+41,99459,Male,Hispanic,4,1,Married,Master,Doctor,Suburban,2,6,Rarely,0,3,4,Never,Non-Vegetarian,Center,311
+18,36779,Non-binary,White,2,1,Single,PhD,Engineer,Rural,3,4,Often,0,8,2,Monthly,Non-Vegetarian,Center,714
+61,83932,Male,Asian,5,0,Single,PhD,Artist,Rural,3,1,Often,0,4,1,Rarely,Non-Vegetarian,Center,331
+25,92936,Female,Black,4,0,Single,Master,Manager,Suburban,2,1,Rarely,0,7,2,Never,Vegan,Right,459
+41,44466,Male,Hispanic,5,1,Divorced,Bachelor,Doctor,Suburban,1,5,Always,0,5,4,Daily,Vegan,Right,536
+28,56939,Male,Black,3,1,Single,High School,Doctor,Urban,3,2,Often,1,2,3,Rarely,Vegan,Right,480
+68,89896,Male,Asian,2,1,Divorced,Master,Artist,Suburban,4,4,Always,1,7,1,Never,Vegan,Right,640
+34,55270,Female,Asian,4,1,Single,High School,Engineer,Suburban,4,1,Often,1,8,0,Weekly,Non-Vegetarian,Left,757
+25,79163,Male,Other,3,0,Single,High School,Manager,Suburban,0,4,Often,0,7,0,Weekly,Vegan,Right,379
+52,71934,Male,White,3,1,Married,Master,Engineer,Urban,2,6,Rarely,1,3,2,Never,Vegan,Center,772
+52,84895,Male,Other,5,0,Divorced,PhD,Clerk,Suburban,1,4,Often,1,5,3,Monthly,Vegan,Left,411
+50,52307,Female,Hispanic,3,1,Single,High School,Engineer,Suburban,0,1,Never,0,0,0,Monthly,Vegan,Center,591
+22,74098,Non-binary,Black,2,1,Divorced,High School,Doctor,Urban,2,7,Never,0,3,2,Rarely,Vegetarian,Right,682
+59,80921,Female,Hispanic,2,1,Divorced,Bachelor,Manager,Suburban,3,2,Rarely,1,7,4,Weekly,Non-Vegetarian,Left,316
+56,25486,Female,Asian,1,1,Widowed,PhD,Engineer,Suburban,4,9,Always,1,0,2,Monthly,Non-Vegetarian,Right,792
+58,28335,Female,Other,2,1,Married,High School,Manager,Urban,1,3,Always,0,2,2,Monthly,Vegan,Left,630
+45,31130,Female,Other,3,1,Married,Bachelor,Manager,Rural,4,8,Always,0,0,2,Weekly,Vegetarian,Center,785
+24,80566,Male,Other,2,1,Married,PhD,Clerk,Urban,3,8,Never,0,8,1,Daily,Non-Vegetarian,Right,705
+26,86703,Male,Hispanic,5,1,Widowed,Master,Clerk,Suburban,2,3,Always,1,1,2,Monthly,Non-Vegetarian,Right,416
+25,47192,Male,Asian,1,1,Widowed,Master,Doctor,Suburban,3,4,Always,1,8,2,Never,Vegan,Left,414
+29,21062,Male,Black,3,1,Married,Bachelor,Artist,Suburban,3,2,Rarely,0,3,1,Rarely,Vegan,Left,848
+51,41545,Male,Black,1,1,Widowed,Master,Manager,Urban,4,4,Always,0,1,1,Monthly,Non-Vegetarian,Right,846
+50,41689,Female,Hispanic,3,1,Widowed,High School,Artist,Suburban,1,9,Never,1,3,4,Monthly,Non-Vegetarian,Left,635
+65,31174,Male,Other,5,0,Widowed,PhD,Doctor,Suburban,3,2,Never,1,9,3,Daily,Vegetarian,Right,635
+40,29348,Female,White,1,1,Married,High School,Manager,Urban,4,3,Never,0,5,0,Never,Non-Vegetarian,Left,446
+41,43714,Female,Hispanic,4,1,Married,High School,Manager,Rural,1,4,Rarely,1,6,0,Rarely,Non-Vegetarian,Center,421
+54,58102,Male,Hispanic,3,0,Married,Master,Artist,Rural,2,5,Rarely,0,2,2,Monthly,Vegan,Left,380
+52,94460,Female,Asian,4,0,Widowed,High School,Engineer,Suburban,2,1,Often,0,2,4,Rarely,Non-Vegetarian,Center,674
+61,26801,Female,Black,1,0,Married,Master,Clerk,Urban,0,7,Always,1,9,2,Weekly,Vegan,Left,362
+57,92267,Male,Hispanic,4,1,Widowed,PhD,Engineer,Suburban,4,7,Rarely,0,7,0,Monthly,Non-Vegetarian,Left,803
+39,68136,Female,Hispanic,4,1,Single,PhD,Artist,Urban,1,9,Never,1,4,1,Monthly,Non-Vegetarian,Right,748
+44,43625,Female,Other,1,1,Widowed,High School,Clerk,Urban,3,4,Never,1,3,3,Weekly,Non-Vegetarian,Left,727
+52,92592,Female,Other,5,1,Divorced,Bachelor,Engineer,Rural,2,6,Rarely,1,6,4,Daily,Vegetarian,Left,726
+18,97052,Female,White,4,1,Married,Master,Clerk,Rural,1,2,Rarely,0,6,1,Monthly,Vegan,Center,720
+52,64261,Female,Asian,4,1,Married,Master,Manager,Urban,4,4,Rarely,0,8,3,Rarely,Vegetarian,Left,621
+54,21542,Female,White,5,1,Divorced,High School,Engineer,Suburban,0,2,Often,0,8,4,Never,Non-Vegetarian,Right,465
+64,41677,Male,Other,4,1,Widowed,Master,Clerk,Rural,2,5,Never,1,4,4,Rarely,Vegetarian,Center,760
+31,66732,Male,Black,4,1,Single,Master,Clerk,Suburban,1,7,Often,1,7,0,Daily,Vegan,Right,758
+20,70343,Male,Other,4,1,Divorced,Bachelor,Clerk,Rural,1,1,Often,1,9,1,Never,Non-Vegetarian,Right,488
+18,59081,Female,Asian,2,0,Divorced,Bachelor,Engineer,Rural,1,7,Always,1,0,4,Rarely,Vegetarian,Right,763
+22,82856,Male,Other,5,1,Widowed,High School,Doctor,Suburban,4,6,Never,1,8,4,Rarely,Vegetarian,Right,678
+43,39065,Female,Asian,4,1,Married,Bachelor,Engineer,Rural,4,6,Never,1,7,3,Weekly,Vegan,Center,301
+31,74693,Female,Asian,5,1,Widowed,High School,Artist,Rural,4,8,Rarely,0,5,0,Daily,Vegetarian,Left,663
+56,46962,Female,Asian,3,0,Divorced,PhD,Engineer,Suburban,3,8,Rarely,0,2,2,Weekly,Vegan,Right,371
+44,48295,Non-binary,Asian,3,0,Divorced,High School,Clerk,Rural,1,6,Always,1,2,0,Never,Non-Vegetarian,Center,726
+26,33807,Female,Asian,4,1,Married,PhD,Manager,Rural,2,3,Often,0,7,2,Weekly,Non-Vegetarian,Right,469
+32,62348,Female,Black,5,0,Married,High School,Engineer,Rural,4,5,Rarely,0,4,1,Daily,Vegetarian,Left,504
+32,46432,Male,White,5,1,Married,Master,Engineer,Suburban,4,2,Rarely,1,9,1,Monthly,Non-Vegetarian,Center,636
+43,77854,Female,Hispanic,5,0,Widowed,Bachelor,Clerk,Urban,1,5,Never,1,6,4,Monthly,Non-Vegetarian,Center,771
+59,60262,Male,White,2,1,Married,PhD,Manager,Suburban,4,9,Never,0,4,1,Never,Vegetarian,Left,494
+30,57080,Male,Asian,3,1,Divorced,High School,Manager,Urban,3,1,Rarely,1,7,4,Monthly,Non-Vegetarian,Center,574
+68,21324,Female,Black,5,1,Divorced,Bachelor,Artist,Rural,3,5,Never,1,9,0,Weekly,Vegetarian,Left,306
+49,55909,Female,Other,5,1,Single,High School,Engineer,Urban,4,6,Always,0,9,1,Never,Vegan,Center,477
+56,39870,Male,Black,2,0,Widowed,Bachelor,Manager,Suburban,1,7,Rarely,0,3,0,Daily,Vegan,Center,541
+66,54578,Female,Asian,2,0,Single,Bachelor,Manager,Suburban,1,9,Never,0,1,0,Never,Vegan,Left,502
+69,92124,Female,Black,5,1,Divorced,High School,Doctor,Rural,1,6,Always,1,2,1,Never,Vegetarian,Left,842
+49,46790,Female,Black,1,1,Single,PhD,Doctor,Urban,0,5,Never,1,7,0,Rarely,Vegetarian,Center,761
+21,45289,Female,Asian,5,1,Divorced,PhD,Manager,Rural,4,7,Never,1,6,1,Rarely,Non-Vegetarian,Center,379
+47,75129,Female,Black,5,1,Single,Master,Artist,Rural,1,1,Never,1,1,1,Never,Non-Vegetarian,Left,822
+54,35485,Non-binary,Hispanic,2,1,Married,Bachelor,Manager,Suburban,3,5,Rarely,0,5,1,Monthly,Non-Vegetarian,Left,716
+40,64482,Female,Hispanic,2,1,Single,Master,Clerk,Urban,2,2,Often,0,8,2,Rarely,Non-Vegetarian,Center,683
+56,24748,Female,Black,5,1,Married,Master,Engineer,Urban,2,4,Never,1,3,0,Daily,Non-Vegetarian,Center,690
+62,29435,Non-binary,Other,5,0,Married,High School,Artist,Urban,1,7,Always,0,8,3,Weekly,Vegetarian,Center,425
+32,23709,Non-binary,Asian,5,1,Widowed,High School,Clerk,Urban,2,5,Rarely,0,1,1,Rarely,Vegetarian,Left,793
+60,50355,Male,Hispanic,2,1,Married,High School,Artist,Rural,2,6,Rarely,0,1,0,Never,Vegan,Center,346
+46,75771,Male,Other,5,1,Married,Bachelor,Clerk,Rural,0,2,Always,0,8,4,Monthly,Vegan,Right,775
+53,77799,Male,Black,5,0,Single,High School,Engineer,Suburban,3,3,Never,0,6,1,Weekly,Vegan,Left,763
+30,33116,Male,Other,4,1,Divorced,High School,Engineer,Rural,3,7,Often,0,6,1,Rarely,Vegan,Center,422
+49,45470,Female,White,1,1,Widowed,Bachelor,Doctor,Rural,0,2,Never,0,0,3,Monthly,Vegetarian,Left,773
+24,62344,Female,Hispanic,3,1,Married,Bachelor,Clerk,Suburban,0,6,Always,0,5,2,Monthly,Vegetarian,Right,433
+68,62918,Female,Black,1,1,Widowed,PhD,Doctor,Suburban,2,5,Rarely,1,6,2,Monthly,Vegetarian,Left,322
+39,72224,Male,Asian,4,1,Single,High School,Clerk,Suburban,4,1,Often,1,5,1,Never,Non-Vegetarian,Center,534
+45,59298,Female,Black,3,1,Married,High School,Doctor,Rural,2,4,Rarely,0,5,0,Daily,Non-Vegetarian,Right,358
+19,81629,Female,Asian,5,0,Single,High School,Engineer,Rural,0,2,Always,1,1,4,Monthly,Vegan,Right,463
+59,86040,Female,Black,4,1,Widowed,PhD,Artist,Suburban,3,4,Never,0,5,4,Weekly,Non-Vegetarian,Center,515
+62,48016,Non-binary,Other,5,0,Single,High School,Doctor,Suburban,2,1,Often,1,3,0,Rarely,Vegetarian,Center,482
+23,43960,Female,Other,2,1,Widowed,PhD,Clerk,Suburban,4,2,Rarely,1,8,1,Weekly,Vegan,Center,389
+45,53591,Male,Other,4,1,Single,Master,Clerk,Rural,2,8,Rarely,1,0,4,Never,Vegan,Left,610
+45,87641,Female,White,2,0,Widowed,PhD,Engineer,Rural,1,6,Rarely,1,7,2,Never,Non-Vegetarian,Left,556
+61,56395,Male,Asian,4,1,Divorced,Master,Clerk,Urban,2,2,Never,0,4,0,Weekly,Vegan,Left,832
+61,42700,Male,Other,4,0,Single,High School,Manager,Rural,0,6,Often,0,0,3,Daily,Non-Vegetarian,Center,832
+37,54620,Female,White,2,1,Single,Master,Artist,Rural,3,9,Never,1,3,1,Never,Non-Vegetarian,Center,351
+47,40559,Male,Asian,3,1,Divorced,PhD,Doctor,Rural,3,7,Never,0,0,0,Never,Vegan,Left,637
+28,81642,Female,Black,1,1,Divorced,Bachelor,Artist,Suburban,0,9,Never,0,5,4,Weekly,Non-Vegetarian,Right,470
+45,96539,Male,White,5,0,Single,Master,Engineer,Rural,1,5,Always,1,1,1,Never,Non-Vegetarian,Left,366
+42,41732,Female,Hispanic,4,1,Divorced,Master,Doctor,Suburban,0,7,Always,1,4,2,Daily,Non-Vegetarian,Right,599
+56,50354,Male,White,5,1,Married,High School,Doctor,Urban,2,7,Always,1,6,1,Daily,Non-Vegetarian,Center,531
+50,33843,Non-binary,White,2,1,Widowed,PhD,Manager,Urban,0,3,Often,0,1,1,Daily,Vegan,Center,367
+18,91726,Female,Asian,5,1,Widowed,Master,Engineer,Suburban,0,7,Never,1,5,2,Rarely,Vegetarian,Left,805
+44,37640,Male,Black,2,0,Widowed,Master,Clerk,Suburban,1,1,Never,0,5,2,Daily,Vegetarian,Left,327
+69,72528,Female,Hispanic,5,1,Married,Master,Manager,Suburban,2,9,Always,0,4,1,Daily,Non-Vegetarian,Center,350
+30,58413,Non-binary,Other,1,0,Divorced,Master,Manager,Rural,4,6,Never,1,4,2,Rarely,Non-Vegetarian,Left,559
+58,72638,Female,Other,1,1,Divorced,Bachelor,Artist,Urban,4,5,Never,0,2,0,Monthly,Non-Vegetarian,Center,483
+20,72736,Male,White,1,1,Single,PhD,Artist,Suburban,3,7,Rarely,0,9,2,Never,Vegetarian,Center,322
+56,88866,Female,Asian,1,0,Divorced,High School,Artist,Rural,0,5,Never,1,9,2,Daily,Non-Vegetarian,Right,428
+23,39087,Female,Asian,1,0,Single,High School,Manager,Urban,3,5,Rarely,0,1,1,Never,Vegan,Left,590
+25,61430,Female,Other,1,0,Married,Bachelor,Clerk,Rural,1,7,Never,0,6,0,Weekly,Vegan,Center,800
+44,44504,Female,Hispanic,2,1,Widowed,PhD,Doctor,Urban,4,7,Often,0,0,3,Never,Vegan,Left,485
+26,27114,Male,Black,4,1,Widowed,Master,Artist,Rural,0,3,Always,0,5,3,Rarely,Vegetarian,Right,778
+54,98859,Male,Hispanic,5,1,Widowed,Bachelor,Clerk,Urban,1,3,Rarely,0,5,4,Never,Non-Vegetarian,Right,791
+50,30975,Female,Black,1,0,Divorced,PhD,Engineer,Urban,1,3,Always,1,2,2,Never,Non-Vegetarian,Left,812
+68,31023,Male,Other,2,0,Single,Master,Artist,Rural,0,6,Rarely,1,1,2,Never,Non-Vegetarian,Left,366
+59,41447,Male,Black,2,1,Single,Bachelor,Doctor,Suburban,1,6,Rarely,0,1,0,Monthly,Vegetarian,Center,766
+61,43959,Non-binary,Asian,2,0,Married,PhD,Engineer,Urban,0,3,Rarely,1,8,3,Monthly,Vegetarian,Right,584
+41,86203,Female,White,4,1,Divorced,High School,Engineer,Suburban,0,3,Often,0,4,4,Weekly,Vegetarian,Right,716
+32,49703,Female,White,5,1,Married,High School,Doctor,Rural,2,8,Never,0,6,0,Rarely,Vegetarian,Right,399
+49,29337,Female,Other,4,1,Single,PhD,Artist,Suburban,3,8,Rarely,1,4,2,Never,Vegan,Left,488
+49,66427,Female,Asian,3,1,Single,High School,Manager,Suburban,1,7,Often,0,6,3,Never,Vegetarian,Center,687
+41,81529,Female,Hispanic,2,1,Widowed,PhD,Doctor,Suburban,1,4,Rarely,1,3,4,Never,Vegetarian,Left,540
+58,51921,Female,Asian,3,0,Divorced,Master,Doctor,Suburban,2,4,Never,0,7,1,Never,Vegetarian,Left,716
+69,53307,Male,White,1,0,Single,PhD,Doctor,Suburban,2,3,Rarely,1,9,3,Monthly,Non-Vegetarian,Left,475
+66,47355,Male,White,1,0,Widowed,Master,Engineer,Urban,2,5,Often,0,9,4,Weekly,Non-Vegetarian,Center,686
+66,24835,Female,Asian,4,1,Divorced,Bachelor,Clerk,Urban,4,3,Never,0,6,0,Daily,Non-Vegetarian,Left,770
+69,40159,Female,Asian,5,0,Married,PhD,Manager,Urban,4,8,Often,0,9,1,Rarely,Vegan,Right,532
+29,67605,Male,White,3,1,Divorced,Bachelor,Artist,Rural,4,7,Never,1,4,4,Never,Vegan,Right,751
+56,58088,Male,Hispanic,5,1,Divorced,High School,Artist,Suburban,0,3,Never,1,5,4,Weekly,Vegetarian,Right,576
+19,98752,Male,Other,4,1,Single,Master,Clerk,Urban,1,9,Always,1,4,2,Daily,Non-Vegetarian,Center,528
+20,75284,Male,Other,1,1,Single,PhD,Doctor,Rural,3,5,Always,0,6,3,Weekly,Vegan,Left,470
+66,77043,Female,Asian,5,0,Divorced,Bachelor,Manager,Urban,0,9,Always,0,1,2,Monthly,Non-Vegetarian,Center,512
+54,55547,Male,Other,5,1,Single,Master,Artist,Urban,1,7,Never,0,4,1,Daily,Vegan,Left,581
+66,47532,Female,White,1,1,Single,Master,Artist,Suburban,1,7,Rarely,1,9,4,Weekly,Vegan,Right,340
+34,54349,Female,White,3,0,Single,High School,Doctor,Rural,2,6,Often,1,2,2,Monthly,Vegetarian,Left,421
+66,65445,Female,Asian,1,0,Widowed,High School,Clerk,Suburban,2,2,Often,0,8,3,Weekly,Vegetarian,Left,526
+19,25713,Female,Asian,5,1,Widowed,Master,Manager,Suburban,0,9,Often,1,5,1,Weekly,Vegan,Left,593
+19,76178,Male,Asian,3,1,Divorced,Master,Clerk,Urban,2,6,Always,0,9,0,Daily,Vegetarian,Center,566
+45,69407,Female,Hispanic,3,1,Single,PhD,Clerk,Suburban,1,8,Never,1,2,2,Monthly,Vegan,Left,840
+40,90340,Male,Other,1,1,Widowed,Master,Manager,Rural,2,1,Always,1,6,1,Never,Vegan,Left,750
+54,70990,Male,Asian,5,1,Divorced,PhD,Manager,Suburban,4,5,Rarely,0,3,0,Rarely,Non-Vegetarian,Left,748
+49,95672,Non-binary,Black,4,1,Single,Master,Artist,Suburban,2,1,Never,0,2,2,Daily,Vegetarian,Center,360
+50,85545,Male,Black,5,1,Married,High School,Artist,Suburban,1,8,Often,1,7,1,Monthly,Vegetarian,Center,801
+18,78141,Male,White,2,1,Single,PhD,Manager,Urban,0,8,Always,1,3,1,Weekly,Vegetarian,Center,446
+36,43793,Female,Other,4,1,Single,Bachelor,Engineer,Rural,3,1,Always,1,0,2,Monthly,Non-Vegetarian,Left,633
+19,76570,Male,Asian,3,1,Widowed,High School,Artist,Urban,2,9,Rarely,1,5,1,Rarely,Non-Vegetarian,Right,441
+61,57892,Female,Black,4,1,Divorced,PhD,Engineer,Urban,1,2,Rarely,0,9,4,Rarely,Non-Vegetarian,Right,343
+43,21015,Male,Other,3,1,Divorced,PhD,Manager,Urban,3,9,Always,1,0,2,Never,Vegetarian,Right,443
+49,81813,Non-binary,White,3,1,Widowed,Bachelor,Artist,Urban,3,1,Rarely,1,4,1,Never,Vegetarian,Left,632
+23,47712,Female,Hispanic,4,1,Single,PhD,Clerk,Urban,4,9,Often,1,6,0,Rarely,Vegetarian,Right,796
+49,28415,Female,Other,3,1,Married,Master,Manager,Rural,3,4,Rarely,0,5,0,Daily,Non-Vegetarian,Right,695
+21,82292,Non-binary,Other,3,1,Single,Bachelor,Doctor,Suburban,1,9,Rarely,0,1,4,Daily,Non-Vegetarian,Right,354
+28,43833,Male,Hispanic,2,1,Single,High School,Engineer,Urban,1,7,Always,0,3,2,Weekly,Vegan,Left,606
+34,24158,Non-binary,Other,5,0,Married,High School,Manager,Urban,2,6,Always,0,1,1,Never,Non-Vegetarian,Right,722
+55,82680,Male,White,5,1,Widowed,Master,Manager,Rural,2,5,Never,0,0,1,Weekly,Vegan,Right,716
+41,40309,Female,White,2,0,Divorced,High School,Artist,Rural,2,9,Never,0,2,0,Never,Vegetarian,Left,624
+22,26970,Male,Hispanic,4,1,Widowed,PhD,Artist,Suburban,3,2,Always,0,2,4,Rarely,Non-Vegetarian,Center,379
+69,92474,Female,Asian,1,1,Widowed,PhD,Artist,Rural,3,2,Rarely,0,6,0,Daily,Vegetarian,Right,330
+51,66540,Male,Black,1,1,Single,Master,Doctor,Suburban,4,9,Rarely,1,0,0,Daily,Vegetarian,Center,411
+23,40384,Female,Asian,1,1,Divorced,High School,Artist,Urban,2,3,Never,0,8,4,Rarely,Vegetarian,Right,771
+39,38017,Female,Other,2,1,Divorced,High School,Manager,Urban,0,8,Never,0,5,2,Weekly,Vegetarian,Left,373
+28,95880,Non-binary,Black,2,1,Widowed,Master,Artist,Suburban,4,9,Never,0,3,1,Weekly,Non-Vegetarian,Center,778
+65,28702,Male,Hispanic,3,1,Married,Bachelor,Clerk,Rural,0,8,Often,0,2,2,Monthly,Vegetarian,Center,686
+33,20384,Female,Hispanic,1,1,Widowed,High School,Artist,Suburban,3,4,Often,1,2,3,Never,Vegan,Center,732
+50,20404,Female,Black,4,0,Married,Bachelor,Doctor,Rural,4,1,Never,0,1,3,Weekly,Non-Vegetarian,Center,711
+26,60943,Male,White,4,0,Divorced,High School,Clerk,Urban,4,4,Rarely,1,1,3,Rarely,Vegetarian,Right,766
+23,67926,Male,Black,1,1,Widowed,High School,Manager,Rural,1,9,Never,1,9,4,Weekly,Non-Vegetarian,Right,547
+33,49189,Male,Other,1,1,Single,High School,Manager,Suburban,3,2,Often,1,4,0,Daily,Vegan,Center,419
+46,32763,Female,White,1,0,Widowed,High School,Engineer,Suburban,3,3,Rarely,1,8,2,Never,Vegetarian,Right,366
+20,38384,Female,Hispanic,2,0,Divorced,PhD,Clerk,Urban,4,8,Often,1,1,1,Monthly,Vegan,Center,626
+37,80100,Female,Black,2,0,Single,Bachelor,Engineer,Rural,3,6,Rarely,1,1,3,Never,Vegetarian,Center,769
+53,29860,Male,Asian,2,1,Single,Bachelor,Clerk,Rural,4,8,Often,0,5,2,Daily,Vegan,Left,792
+36,70612,Male,Asian,5,1,Married,High School,Clerk,Rural,1,7,Rarely,0,9,3,Daily,Vegetarian,Center,585
+43,43574,Male,Other,4,1,Single,High School,Doctor,Urban,4,5,Rarely,1,1,3,Daily,Non-Vegetarian,Right,611
+20,43524,Non-binary,Asian,4,0,Single,Bachelor,Engineer,Rural,3,9,Rarely,0,3,1,Daily,Vegetarian,Center,608
+36,89172,Male,Black,3,1,Widowed,PhD,Doctor,Suburban,3,4,Rarely,0,5,4,Rarely,Non-Vegetarian,Left,396
+37,30916,Male,Black,2,0,Divorced,Master,Clerk,Rural,4,6,Always,1,4,0,Monthly,Vegetarian,Right,412
+49,24809,Male,Asian,5,0,Married,Master,Manager,Urban,4,2,Often,1,0,4,Daily,Vegetarian,Left,755
+24,52201,Female,Black,5,1,Widowed,Bachelor,Clerk,Rural,4,2,Often,0,5,2,Daily,Vegan,Left,762
+69,73330,Non-binary,Other,4,0,Single,High School,Doctor,Rural,2,2,Always,1,0,4,Weekly,Vegan,Center,431
+58,33456,Female,White,2,0,Single,High School,Engineer,Suburban,3,7,Rarely,0,2,2,Monthly,Vegan,Left,420
+50,76397,Female,Other,3,0,Married,PhD,Engineer,Rural,3,2,Rarely,1,9,2,Never,Vegetarian,Left,496
+57,58765,Female,Other,2,0,Divorced,Master,Doctor,Suburban,2,2,Often,0,4,0,Monthly,Vegetarian,Right,781
+56,54816,Male,Black,1,0,Married,PhD,Engineer,Suburban,4,9,Always,0,9,1,Monthly,Vegetarian,Left,338
+35,65106,Non-binary,White,2,1,Widowed,Master,Artist,Urban,1,7,Rarely,1,4,0,Monthly,Non-Vegetarian,Center,811
+57,73932,Female,Black,1,1,Married,Bachelor,Manager,Suburban,4,3,Rarely,0,9,4,Daily,Non-Vegetarian,Center,773
+18,37100,Female,Hispanic,1,1,Single,Master,Manager,Suburban,4,3,Rarely,1,5,2,Daily,Vegetarian,Center,460
+28,77091,Female,Black,3,1,Widowed,PhD,Manager,Urban,2,7,Never,0,9,3,Rarely,Vegan,Left,588
+45,41949,Female,Black,4,0,Single,PhD,Engineer,Suburban,3,5,Always,0,7,3,Never,Vegan,Right,499
+42,90080,Female,Black,2,1,Divorced,PhD,Engineer,Urban,4,6,Rarely,1,4,2,Weekly,Vegan,Center,827
+67,57744,Non-binary,White,1,1,Single,Bachelor,Clerk,Rural,3,8,Never,0,0,0,Monthly,Vegetarian,Left,802
+40,65543,Non-binary,Black,2,0,Single,Master,Clerk,Urban,0,9,Always,0,4,1,Never,Vegan,Center,547
+48,56187,Female,White,4,1,Married,Master,Manager,Suburban,3,1,Rarely,0,2,0,Never,Vegetarian,Center,682
+47,27239,Female,Asian,4,0,Single,PhD,Artist,Urban,1,3,Often,1,3,2,Rarely,Non-Vegetarian,Right,517
+59,34489,Male,Hispanic,5,1,Widowed,Master,Clerk,Suburban,1,7,Never,1,7,2,Weekly,Vegan,Center,386
+52,78017,Female,White,4,1,Widowed,High School,Clerk,Rural,4,6,Never,1,6,1,Monthly,Non-Vegetarian,Right,381
+24,81877,Male,Asian,3,1,Divorced,High School,Engineer,Urban,3,7,Rarely,0,4,4,Weekly,Vegan,Left,361
+33,63125,Female,White,1,1,Widowed,High School,Artist,Rural,4,8,Rarely,0,1,4,Rarely,Vegetarian,Center,799
+43,69922,Non-binary,White,5,1,Married,Master,Manager,Suburban,2,6,Never,0,5,1,Daily,Vegetarian,Left,341
+65,52049,Female,Hispanic,3,1,Divorced,Bachelor,Clerk,Suburban,1,3,Often,1,5,4,Never,Vegetarian,Left,311
+69,57131,Female,Other,2,0,Widowed,Bachelor,Artist,Rural,4,2,Often,0,9,3,Monthly,Vegetarian,Left,414
+66,62944,Male,Other,1,0,Married,Bachelor,Artist,Urban,2,7,Always,1,9,4,Daily,Vegan,Center,517
+19,93963,Male,White,4,1,Widowed,Bachelor,Manager,Urban,4,1,Rarely,0,5,4,Rarely,Non-Vegetarian,Right,405
+18,44285,Female,Black,1,1,Widowed,High School,Artist,Suburban,3,3,Often,1,8,4,Weekly,Vegetarian,Center,827
+65,57626,Male,Asian,2,1,Single,High School,Artist,Rural,3,4,Always,1,7,3,Never,Vegan,Left,771
+29,62808,Male,Black,5,1,Widowed,PhD,Artist,Rural,3,1,Often,1,7,4,Monthly,Non-Vegetarian,Right,686
+22,73871,Male,Black,5,1,Widowed,Master,Clerk,Urban,3,5,Rarely,0,0,3,Daily,Vegetarian,Left,525
+54,39198,Female,White,5,1,Married,Master,Manager,Urban,0,3,Always,0,4,1,Daily,Non-Vegetarian,Right,780
+49,39758,Female,White,4,1,Married,Bachelor,Artist,Urban,2,2,Always,0,6,0,Never,Vegetarian,Center,707
+26,35254,Male,White,3,1,Single,High School,Artist,Rural,2,3,Always,0,5,1,Weekly,Non-Vegetarian,Right,756
+58,64238,Female,White,3,1,Widowed,Bachelor,Clerk,Urban,3,8,Often,0,4,0,Rarely,Non-Vegetarian,Center,320
+52,21252,Female,Other,1,1,Single,PhD,Manager,Urban,0,6,Rarely,1,7,1,Weekly,Vegetarian,Left,502
+36,59764,Female,White,4,0,Widowed,Master,Engineer,Suburban,3,7,Always,0,2,0,Weekly,Vegan,Right,716
+65,97709,Female,Other,5,1,Divorced,Master,Clerk,Urban,0,6,Never,1,5,0,Weekly,Non-Vegetarian,Left,715
+33,57441,Male,Other,5,0,Divorced,Bachelor,Manager,Urban,3,6,Rarely,1,4,2,Never,Vegetarian,Right,747
+20,73682,Female,White,2,0,Single,PhD,Artist,Rural,1,3,Never,0,7,0,Never,Non-Vegetarian,Center,811
+37,79494,Female,Hispanic,2,0,Single,Master,Manager,Rural,1,8,Never,1,3,0,Rarely,Non-Vegetarian,Right,384
+41,85215,Female,Asian,5,1,Single,PhD,Manager,Suburban,4,7,Always,0,7,2,Weekly,Vegan,Right,466
+50,98587,Female,Black,5,1,Married,PhD,Manager,Urban,3,7,Always,0,9,4,Never,Non-Vegetarian,Center,683
+41,26949,Male,Other,4,0,Married,Bachelor,Engineer,Suburban,2,6,Often,0,1,4,Rarely,Non-Vegetarian,Center,767
+69,75393,Male,Asian,3,1,Married,High School,Manager,Rural,4,5,Often,1,8,2,Rarely,Vegetarian,Center,371
+28,93553,Female,Hispanic,2,1,Single,Bachelor,Engineer,Suburban,1,8,Often,0,8,3,Weekly,Vegetarian,Right,820
+66,26941,Female,Black,3,1,Widowed,High School,Artist,Rural,3,5,Rarely,0,9,0,Monthly,Vegan,Left,772
+25,45934,Female,Black,4,0,Divorced,PhD,Engineer,Suburban,4,9,Often,1,9,0,Weekly,Non-Vegetarian,Right,557
+53,43386,Female,Other,5,1,Single,High School,Artist,Suburban,3,9,Never,0,5,2,Monthly,Non-Vegetarian,Right,574
+55,81886,Female,White,3,1,Married,PhD,Artist,Urban,1,1,Often,1,3,2,Rarely,Non-Vegetarian,Left,319
+57,95745,Female,Hispanic,5,0,Married,Master,Engineer,Suburban,4,6,Always,1,3,3,Never,Vegan,Center,789
+37,73413,Male,Other,5,0,Single,Master,Clerk,Urban,1,7,Often,1,5,4,Daily,Non-Vegetarian,Right,789
+52,76800,Female,Hispanic,1,1,Single,Master,Doctor,Urban,0,3,Rarely,0,4,1,Rarely,Vegetarian,Left,625
+65,62318,Male,White,3,1,Married,Bachelor,Manager,Urban,1,7,Rarely,0,5,4,Never,Vegan,Center,828
+42,90173,Female,White,3,1,Widowed,Bachelor,Doctor,Urban,3,7,Never,0,6,0,Rarely,Vegetarian,Center,388
+52,90390,Non-binary,Other,5,1,Married,PhD,Manager,Suburban,2,2,Rarely,0,6,2,Weekly,Vegetarian,Right,785
+42,72329,Male,White,4,1,Married,Master,Manager,Rural,1,7,Often,0,8,3,Monthly,Vegan,Center,649
+46,63088,Male,Asian,1,1,Single,Bachelor,Artist,Rural,2,1,Always,0,7,4,Rarely,Vegetarian,Center,383
+35,59811,Male,Black,5,0,Widowed,Master,Manager,Rural,0,5,Rarely,1,5,3,Never,Non-Vegetarian,Left,686
+63,75479,Non-binary,Other,2,1,Married,Bachelor,Manager,Suburban,4,9,Never,1,5,4,Weekly,Vegan,Left,386
+35,39963,Male,Hispanic,2,1,Married,High School,Engineer,Urban,4,7,Often,0,4,0,Daily,Vegetarian,Center,606
+19,75123,Male,Asian,1,1,Divorced,High School,Doctor,Rural,2,7,Never,0,0,1,Weekly,Non-Vegetarian,Left,453
+52,93477,Male,Other,4,1,Single,Master,Engineer,Suburban,4,2,Rarely,0,8,3,Monthly,Non-Vegetarian,Center,739
+33,34388,Male,White,5,1,Divorced,PhD,Manager,Urban,1,8,Rarely,0,8,3,Weekly,Vegetarian,Right,563
+58,25569,Male,White,3,0,Divorced,Bachelor,Artist,Rural,2,3,Never,1,8,1,Daily,Non-Vegetarian,Left,720
+53,89836,Female,White,1,1,Married,Bachelor,Engineer,Urban,3,8,Often,1,7,3,Never,Vegan,Center,792
+50,56586,Female,White,4,0,Single,High School,Engineer,Rural,1,3,Rarely,1,9,3,Rarely,Vegetarian,Center,710
+21,32015,Male,Hispanic,3,1,Widowed,High School,Clerk,Rural,1,7,Always,1,2,4,Monthly,Non-Vegetarian,Left,472
+50,65002,Male,Asian,2,0,Married,PhD,Manager,Rural,1,2,Rarely,1,0,4,Daily,Non-Vegetarian,Left,303
+31,26254,Male,Black,2,0,Widowed,PhD,Artist,Urban,3,4,Often,1,7,1,Monthly,Vegetarian,Right,771
+38,37144,Male,Hispanic,3,1,Widowed,PhD,Engineer,Suburban,0,6,Rarely,0,6,0,Weekly,Vegetarian,Center,409
+65,44214,Female,Hispanic,1,0,Single,Master,Engineer,Urban,4,9,Never,1,4,3,Monthly,Vegetarian,Right,336
+37,91774,Female,Black,2,1,Divorced,High School,Artist,Rural,2,5,Rarely,0,9,0,Daily,Vegetarian,Right,330
+25,26090,Male,Black,5,1,Single,Master,Manager,Urban,0,9,Rarely,0,6,1,Rarely,Vegan,Right,680
+24,31637,Female,White,3,0,Widowed,High School,Clerk,Suburban,2,5,Often,0,9,1,Rarely,Vegetarian,Left,567
+20,42415,Male,Hispanic,3,0,Married,High School,Engineer,Urban,4,8,Never,0,3,4,Monthly,Vegan,Right,310
+34,44071,Female,Other,2,1,Widowed,Bachelor,Clerk,Suburban,3,1,Often,1,8,3,Never,Vegan,Left,643
+50,78243,Female,Black,1,1,Married,High School,Doctor,Suburban,1,7,Rarely,0,9,2,Monthly,Vegetarian,Left,843
+65,61240,Female,Black,5,1,Married,High School,Manager,Urban,1,4,Always,0,1,1,Weekly,Vegan,Right,465
+29,53434,Male,Asian,1,1,Single,Master,Doctor,Rural,3,5,Rarely,0,8,3,Rarely,Vegetarian,Right,641
+68,89724,Non-binary,Other,4,1,Widowed,High School,Doctor,Suburban,0,6,Often,1,8,0,Rarely,Vegetarian,Center,781
+39,95697,Male,Other,4,1,Divorced,Master,Doctor,Urban,0,5,Always,0,4,4,Rarely,Non-Vegetarian,Right,318
+39,48732,Male,Black,2,1,Widowed,PhD,Manager,Suburban,2,1,Often,1,0,0,Never,Vegetarian,Center,483
+63,31314,Male,White,2,1,Widowed,High School,Manager,Rural,3,9,Often,1,6,1,Never,Non-Vegetarian,Right,844
+47,43954,Male,Asian,2,0,Divorced,High School,Artist,Urban,0,2,Never,1,9,1,Daily,Vegan,Right,309
+55,77108,Non-binary,Other,4,1,Single,Master,Clerk,Urban,3,9,Always,1,9,0,Monthly,Non-Vegetarian,Right,491
+55,56668,Female,Black,1,1,Widowed,PhD,Clerk,Urban,4,2,Rarely,0,3,1,Monthly,Vegan,Right,619
+62,43061,Male,Other,1,1,Widowed,Bachelor,Artist,Rural,1,9,Often,0,8,3,Weekly,Vegetarian,Center,774
+68,99252,Female,Asian,2,1,Married,PhD,Artist,Suburban,1,6,Rarely,1,5,1,Rarely,Vegan,Center,726
+25,59749,Non-binary,Asian,5,1,Widowed,Master,Doctor,Urban,1,9,Never,0,2,4,Never,Vegan,Right,358
+44,36907,Female,Hispanic,1,1,Divorced,PhD,Artist,Suburban,3,6,Never,0,5,3,Weekly,Vegetarian,Right,735
+44,38777,Female,Black,4,1,Married,Master,Engineer,Suburban,3,6,Always,1,9,2,Weekly,Vegan,Center,396
+51,71745,Non-binary,Asian,3,1,Single,Master,Clerk,Rural,2,2,Never,0,5,1,Never,Vegetarian,Left,795
+38,43624,Non-binary,Hispanic,3,1,Married,Bachelor,Artist,Urban,1,8,Never,1,4,1,Monthly,Non-Vegetarian,Left,577
+47,43321,Female,Hispanic,3,1,Divorced,High School,Engineer,Suburban,2,3,Rarely,0,1,4,Rarely,Vegetarian,Left,564
+50,30488,Male,Other,5,1,Divorced,Master,Engineer,Urban,1,7,Never,1,9,4,Monthly,Vegetarian,Center,308
+45,42574,Male,Other,2,1,Married,Master,Engineer,Urban,2,5,Never,1,9,0,Weekly,Vegan,Center,756
+64,25240,Female,Hispanic,4,1,Single,Bachelor,Engineer,Rural,2,3,Often,1,1,0,Rarely,Non-Vegetarian,Left,572
+50,63221,Male,Other,5,1,Married,Master,Doctor,Urban,4,1,Never,0,6,0,Daily,Vegetarian,Left,307
+22,30478,Female,Asian,4,1,Single,High School,Engineer,Urban,2,8,Often,1,1,4,Weekly,Non-Vegetarian,Right,507
+65,75645,Male,White,4,0,Married,Bachelor,Doctor,Suburban,3,3,Never,1,5,0,Monthly,Non-Vegetarian,Center,422
+36,39262,Male,Asian,2,1,Divorced,High School,Doctor,Rural,2,2,Never,0,4,0,Monthly,Vegan,Center,332
+21,72796,Male,Hispanic,3,0,Widowed,High School,Engineer,Urban,1,1,Always,0,3,2,Monthly,Vegetarian,Left,812
+52,24432,Male,Hispanic,2,1,Widowed,Bachelor,Clerk,Suburban,2,4,Always,1,6,0,Never,Vegan,Left,503
+66,84291,Non-binary,Asian,5,1,Single,Master,Engineer,Rural,0,8,Often,1,7,1,Weekly,Vegetarian,Center,817
+34,99104,Female,Other,5,0,Single,High School,Engineer,Rural,1,3,Never,0,3,4,Rarely,Non-Vegetarian,Right,816
+61,79399,Female,Other,5,0,Single,High School,Engineer,Suburban,0,1,Rarely,1,0,3,Monthly,Vegetarian,Left,742
+45,99714,Female,Hispanic,2,1,Divorced,High School,Clerk,Suburban,1,4,Always,0,0,2,Monthly,Vegetarian,Center,638
+47,70428,Male,Black,4,1,Married,High School,Manager,Suburban,3,9,Rarely,0,0,4,Never,Non-Vegetarian,Center,737
+46,20302,Female,Other,4,1,Divorced,Bachelor,Manager,Suburban,3,1,Always,1,0,4,Rarely,Non-Vegetarian,Right,744
+63,20055,Female,Asian,1,0,Widowed,Bachelor,Doctor,Suburban,3,2,Always,1,4,1,Weekly,Vegetarian,Right,435
+23,28717,Female,Other,5,1,Single,PhD,Doctor,Urban,0,9,Never,1,3,0,Daily,Vegan,Left,686
+52,48699,Male,Asian,4,1,Married,PhD,Clerk,Urban,4,2,Always,1,8,1,Never,Vegetarian,Left,324
+58,93686,Female,Hispanic,1,1,Widowed,High School,Artist,Rural,1,3,Rarely,0,2,0,Weekly,Non-Vegetarian,Left,805
+54,87661,Female,Other,4,1,Widowed,Master,Manager,Urban,3,7,Always,0,6,0,Daily,Vegan,Center,624
+41,64247,Non-binary,Asian,5,1,Widowed,High School,Doctor,Urban,1,3,Often,0,7,4,Monthly,Non-Vegetarian,Left,637
+46,36748,Female,Hispanic,3,0,Divorced,Master,Manager,Urban,0,9,Never,1,5,0,Monthly,Non-Vegetarian,Center,394
+66,24621,Female,Black,5,1,Single,High School,Clerk,Suburban,4,6,Never,1,9,2,Rarely,Vegan,Left,844
+63,35034,Female,Asian,2,1,Widowed,PhD,Clerk,Rural,0,3,Often,0,0,2,Daily,Non-Vegetarian,Right,445
+48,25126,Female,Black,4,1,Single,PhD,Artist,Rural,1,9,Often,0,7,2,Monthly,Non-Vegetarian,Right,530
+52,25122,Male,Black,4,0,Divorced,Master,Artist,Rural,4,1,Often,0,9,4,Monthly,Non-Vegetarian,Center,794
+50,38030,Female,White,2,1,Widowed,High School,Clerk,Rural,4,3,Always,1,2,1,Rarely,Non-Vegetarian,Right,337
+69,75658,Female,Other,2,0,Divorced,Master,Doctor,Urban,0,1,Never,0,7,3,Weekly,Non-Vegetarian,Center,724
+38,58638,Female,Asian,3,1,Divorced,PhD,Manager,Urban,3,2,Often,0,3,0,Monthly,Non-Vegetarian,Center,736
+49,87067,Male,Black,4,1,Single,High School,Engineer,Suburban,1,8,Always,1,7,3,Never,Non-Vegetarian,Right,667
+40,54674,Male,White,4,1,Widowed,High School,Artist,Rural,2,7,Often,1,0,1,Never,Non-Vegetarian,Center,644
+50,55854,Female,Hispanic,3,0,Divorced,Master,Engineer,Urban,2,2,Rarely,1,2,1,Weekly,Non-Vegetarian,Right,459
+20,66271,Male,Asian,1,0,Widowed,Bachelor,Doctor,Urban,0,2,Rarely,1,5,4,Daily,Vegetarian,Left,849
+35,93688,Female,Black,3,1,Single,Master,Artist,Suburban,1,9,Never,0,8,2,Rarely,Vegetarian,Left,840
+42,58518,Male,Other,5,0,Divorced,PhD,Engineer,Suburban,1,6,Always,1,1,2,Never,Non-Vegetarian,Right,443
+59,30267,Male,White,4,0,Single,PhD,Doctor,Suburban,0,5,Rarely,1,0,1,Never,Vegetarian,Right,644
+48,21062,Non-binary,Black,2,1,Widowed,PhD,Manager,Urban,1,6,Rarely,1,9,4,Weekly,Vegan,Right,568
+20,70448,Female,Other,5,1,Widowed,PhD,Doctor,Urban,3,9,Always,0,2,4,Daily,Vegetarian,Right,567
+57,26229,Male,Black,4,0,Single,PhD,Artist,Suburban,0,7,Often,0,3,0,Daily,Non-Vegetarian,Left,468
+63,76793,Male,Asian,3,1,Married,Bachelor,Clerk,Rural,3,9,Always,0,4,2,Weekly,Non-Vegetarian,Center,332
+41,67915,Male,Asian,5,0,Divorced,High School,Manager,Suburban,1,4,Often,0,2,1,Never,Vegetarian,Center,676
+67,24632,Female,Asian,4,1,Widowed,Master,Engineer,Suburban,0,2,Rarely,1,9,3,Rarely,Non-Vegetarian,Left,513
+49,23596,Male,White,1,1,Widowed,Master,Artist,Suburban,1,8,Rarely,0,1,2,Never,Vegan,Center,739
+64,26168,Female,Asian,1,1,Divorced,PhD,Clerk,Suburban,0,4,Rarely,0,1,0,Daily,Vegan,Left,791
+39,27561,Non-binary,Other,2,1,Single,Master,Doctor,Urban,1,9,Never,0,6,4,Never,Non-Vegetarian,Center,692
+40,93794,Male,Black,4,1,Single,PhD,Clerk,Rural,3,4,Never,0,8,1,Rarely,Vegan,Right,788
+19,46734,Female,Hispanic,1,1,Single,Bachelor,Artist,Suburban,3,8,Never,0,9,2,Monthly,Vegan,Right,328
+44,26371,Non-binary,Other,3,0,Married,Bachelor,Artist,Rural,1,9,Always,0,1,3,Never,Vegetarian,Right,338
+59,46069,Male,Other,4,1,Married,High School,Clerk,Rural,0,9,Rarely,0,6,0,Weekly,Vegan,Left,472
+19,99905,Female,Asian,3,1,Widowed,Bachelor,Doctor,Rural,2,4,Rarely,1,6,0,Monthly,Vegetarian,Left,316
+43,32910,Female,White,3,1,Single,Bachelor,Clerk,Suburban,3,1,Always,1,6,2,Weekly,Non-Vegetarian,Center,355
+34,93479,Non-binary,Black,1,1,Divorced,High School,Artist,Urban,3,3,Never,0,2,3,Weekly,Vegetarian,Center,525
+57,97735,Female,White,4,1,Widowed,Master,Artist,Suburban,2,9,Always,1,6,0,Weekly,Non-Vegetarian,Center,366
+50,43275,Female,Black,5,0,Divorced,PhD,Engineer,Rural,1,4,Never,1,0,1,Never,Non-Vegetarian,Left,496
+26,92274,Female,Black,1,1,Widowed,PhD,Engineer,Rural,0,5,Rarely,1,9,0,Daily,Non-Vegetarian,Center,322
+60,80004,Female,White,1,1,Married,Master,Manager,Urban,1,7,Often,0,0,3,Monthly,Non-Vegetarian,Right,536
+65,82981,Female,Other,4,1,Widowed,High School,Artist,Suburban,4,5,Never,0,4,4,Rarely,Non-Vegetarian,Center,437
+56,74553,Female,Black,4,1,Married,Master,Engineer,Rural,3,4,Rarely,0,1,4,Daily,Vegetarian,Right,772
+46,68447,Female,White,3,1,Widowed,Bachelor,Clerk,Urban,4,2,Rarely,0,8,2,Never,Non-Vegetarian,Left,528
+59,54529,Male,Black,4,1,Single,High School,Doctor,Rural,3,2,Often,0,6,3,Weekly,Vegan,Right,616
+43,95703,Male,Hispanic,3,0,Divorced,High School,Clerk,Urban,3,4,Rarely,1,3,0,Rarely,Vegan,Right,500
+52,96090,Male,Other,1,0,Single,High School,Doctor,Urban,4,9,Rarely,0,3,0,Monthly,Non-Vegetarian,Right,557
+67,37260,Male,Asian,2,0,Widowed,PhD,Engineer,Suburban,4,8,Never,0,1,4,Daily,Vegan,Left,779
+42,23812,Male,Black,5,1,Widowed,Master,Manager,Rural,1,3,Never,1,4,4,Daily,Vegetarian,Left,477
+41,48024,Non-binary,Hispanic,1,0,Widowed,High School,Clerk,Suburban,4,9,Often,0,3,1,Rarely,Vegetarian,Left,422
+30,78656,Male,Asian,4,1,Married,High School,Clerk,Rural,1,5,Often,1,0,4,Never,Non-Vegetarian,Left,641
+24,47285,Female,Asian,5,1,Divorced,High School,Clerk,Suburban,1,3,Rarely,1,7,1,Monthly,Non-Vegetarian,Center,470
+53,21605,Male,Black,2,1,Divorced,Master,Doctor,Rural,1,5,Never,1,2,0,Rarely,Non-Vegetarian,Left,358
+62,91158,Female,White,2,1,Widowed,PhD,Engineer,Suburban,3,4,Often,1,5,1,Weekly,Vegan,Right,764
+37,92303,Non-binary,Black,3,0,Widowed,Bachelor,Clerk,Urban,3,8,Often,0,3,1,Monthly,Vegan,Left,559
+18,47139,Female,Hispanic,5,1,Married,PhD,Clerk,Rural,4,5,Always,1,8,2,Daily,Vegetarian,Center,672
+25,97149,Female,Asian,3,1,Single,High School,Manager,Rural,3,8,Often,1,6,4,Rarely,Vegan,Center,394
+63,76138,Male,Black,1,1,Single,PhD,Manager,Urban,4,9,Rarely,1,8,1,Daily,Vegetarian,Center,424
+33,96125,Female,White,5,1,Divorced,PhD,Engineer,Suburban,3,4,Never,0,9,0,Daily,Vegan,Right,340
+31,33918,Male,Black,1,1,Married,Bachelor,Engineer,Rural,0,7,Often,1,2,3,Daily,Vegetarian,Left,553
+29,47446,Non-binary,Other,3,1,Widowed,Master,Artist,Rural,0,2,Always,0,0,1,Never,Non-Vegetarian,Left,306
+68,33046,Male,White,5,1,Divorced,Master,Manager,Suburban,4,6,Never,1,4,4,Daily,Vegan,Left,770
+40,44818,Female,Hispanic,3,1,Married,PhD,Artist,Urban,3,8,Often,0,2,2,Weekly,Vegetarian,Right,810
+32,24324,Female,Asian,5,1,Single,PhD,Doctor,Suburban,3,7,Always,1,5,0,Weekly,Vegan,Right,368
+45,96323,Male,Black,3,0,Married,Master,Artist,Suburban,1,7,Often,1,7,2,Monthly,Non-Vegetarian,Center,380
+51,29111,Male,White,2,1,Single,Master,Clerk,Suburban,2,8,Never,0,3,3,Daily,Vegetarian,Center,841
+19,58110,Male,Other,3,0,Married,Bachelor,Artist,Rural,4,7,Never,0,4,1,Daily,Vegan,Left,561
+49,36389,Male,White,2,1,Divorced,High School,Engineer,Urban,2,5,Never,0,4,1,Rarely,Vegan,Right,388
+40,61427,Female,Other,3,1,Single,PhD,Doctor,Urban,2,7,Rarely,1,3,4,Never,Non-Vegetarian,Right,507
+39,99579,Male,Hispanic,5,0,Divorced,Master,Clerk,Suburban,4,3,Often,1,3,1,Monthly,Non-Vegetarian,Left,512
+68,48746,Male,Asian,5,1,Divorced,PhD,Artist,Rural,3,5,Rarely,1,3,0,Daily,Vegetarian,Left,565
+42,20117,Male,Hispanic,5,1,Single,PhD,Doctor,Suburban,4,7,Never,1,3,3,Rarely,Vegan,Center,592
+39,33234,Female,Black,4,1,Single,Master,Doctor,Rural,2,9,Always,1,3,2,Never,Vegan,Center,506
+39,73441,Male,White,1,1,Widowed,Bachelor,Clerk,Rural,3,2,Often,0,4,3,Monthly,Non-Vegetarian,Center,632
+66,20846,Male,Other,5,1,Widowed,PhD,Artist,Rural,0,4,Rarely,0,1,1,Monthly,Non-Vegetarian,Left,376
+69,30954,Male,Other,2,0,Widowed,Bachelor,Doctor,Rural,4,7,Often,1,1,2,Daily,Vegetarian,Left,587
+59,99239,Male,White,5,1,Divorced,Master,Doctor,Urban,4,1,Always,0,8,4,Monthly,Vegan,Center,346
+23,66514,Female,White,4,0,Divorced,High School,Manager,Rural,3,2,Rarely,0,1,3,Rarely,Vegan,Center,499
+32,26469,Male,Black,2,1,Widowed,High School,Doctor,Rural,0,9,Never,0,5,2,Monthly,Vegetarian,Right,726
+60,50105,Male,Hispanic,4,0,Divorced,PhD,Manager,Suburban,0,7,Rarely,0,1,2,Weekly,Vegetarian,Right,509
+54,62101,Female,Other,2,1,Divorced,Master,Artist,Suburban,3,7,Often,1,4,2,Rarely,Non-Vegetarian,Center,719
+50,84323,Female,Black,3,1,Single,Bachelor,Artist,Urban,1,6,Often,0,3,0,Never,Non-Vegetarian,Center,453
+25,78067,Male,Hispanic,1,0,Single,PhD,Artist,Suburban,4,3,Often,1,6,3,Never,Vegetarian,Right,821
+61,69376,Female,Black,1,1,Divorced,Master,Engineer,Rural,4,3,Often,0,6,2,Daily,Vegetarian,Center,714
+61,65587,Non-binary,Other,4,1,Widowed,Master,Artist,Suburban,2,2,Never,0,5,3,Daily,Vegan,Right,652
+22,56976,Male,White,1,1,Married,Bachelor,Doctor,Urban,3,6,Rarely,0,9,2,Weekly,Vegetarian,Right,456
+56,87584,Female,White,4,1,Widowed,PhD,Clerk,Suburban,2,4,Never,1,4,4,Never,Vegetarian,Right,560
+21,98477,Female,Hispanic,4,1,Married,Master,Manager,Suburban,2,5,Never,1,0,4,Never,Vegan,Left,376
+23,62533,Female,Asian,4,1,Widowed,Master,Engineer,Urban,0,3,Never,1,2,4,Never,Vegetarian,Left,787
+62,21828,Male,Hispanic,1,0,Single,Master,Artist,Urban,4,6,Often,1,8,1,Never,Non-Vegetarian,Center,430
+49,21917,Male,Asian,4,0,Divorced,Bachelor,Artist,Rural,2,3,Often,1,0,2,Monthly,Non-Vegetarian,Right,754
+69,40618,Female,Black,1,1,Divorced,PhD,Clerk,Suburban,0,8,Often,1,4,1,Rarely,Vegan,Left,462
+47,52254,Non-binary,Black,4,1,Single,PhD,Clerk,Rural,3,9,Rarely,1,1,3,Rarely,Vegetarian,Center,314
+64,67362,Female,Other,5,1,Married,PhD,Engineer,Suburban,2,4,Always,1,3,1,Weekly,Non-Vegetarian,Center,531
+52,40128,Male,Asian,4,1,Married,PhD,Manager,Suburban,4,9,Often,0,0,3,Monthly,Non-Vegetarian,Center,494
+57,79383,Female,Other,2,1,Married,High School,Artist,Rural,2,7,Rarely,1,2,3,Never,Non-Vegetarian,Center,841
+69,85545,Female,White,4,1,Single,High School,Engineer,Suburban,3,3,Often,1,9,3,Never,Non-Vegetarian,Center,658
+33,29865,Male,Asian,3,1,Married,PhD,Doctor,Suburban,2,7,Often,1,6,1,Daily,Vegetarian,Right,630
+30,22219,Male,Hispanic,4,1,Single,Bachelor,Doctor,Suburban,4,1,Never,0,9,2,Daily,Vegetarian,Center,726
+67,59809,Female,White,2,1,Widowed,High School,Engineer,Urban,0,3,Never,1,2,1,Weekly,Vegetarian,Right,796
+59,25287,Male,White,2,1,Widowed,Master,Artist,Rural,4,6,Never,1,3,2,Never,Vegetarian,Left,785
+47,54387,Female,Hispanic,1,1,Single,High School,Engineer,Urban,0,4,Rarely,0,1,2,Weekly,Non-Vegetarian,Center,748
+36,28512,Male,White,5,1,Divorced,Master,Artist,Rural,1,7,Always,1,2,3,Monthly,Vegan,Left,712
+34,21342,Male,Asian,4,0,Widowed,PhD,Clerk,Rural,4,3,Always,0,8,1,Rarely,Vegan,Right,629
+36,83076,Male,Other,1,0,Married,High School,Engineer,Suburban,4,1,Rarely,0,2,2,Never,Non-Vegetarian,Right,446
+45,39216,Female,White,5,1,Single,Bachelor,Artist,Rural,3,9,Often,0,4,4,Monthly,Non-Vegetarian,Left,558
+43,99767,Non-binary,Asian,4,1,Married,High School,Engineer,Urban,2,6,Rarely,0,1,2,Never,Vegan,Center,591
+54,46614,Male,Black,3,1,Married,High School,Engineer,Urban,0,8,Often,1,3,4,Daily,Vegan,Center,442
+43,56258,Female,Asian,4,1,Divorced,High School,Artist,Urban,0,3,Rarely,0,6,1,Weekly,Non-Vegetarian,Left,664
+40,62078,Female,Other,2,0,Married,PhD,Artist,Rural,3,8,Rarely,0,6,1,Daily,Non-Vegetarian,Left,389
+26,32219,Female,Asian,2,1,Divorced,Bachelor,Manager,Urban,3,2,Rarely,0,2,1,Rarely,Vegetarian,Left,463
+29,20235,Male,Hispanic,3,1,Widowed,High School,Engineer,Rural,2,4,Always,0,4,2,Daily,Vegetarian,Center,780
+18,62929,Female,Other,1,1,Single,Bachelor,Doctor,Urban,2,3,Never,0,0,0,Never,Vegan,Center,383
+18,87444,Female,Black,5,1,Married,PhD,Engineer,Urban,4,1,Rarely,1,9,2,Daily,Non-Vegetarian,Center,376
+64,28567,Male,Hispanic,4,1,Single,Master,Engineer,Rural,1,7,Always,0,9,2,Never,Vegan,Left,816
+51,90792,Male,Asian,2,0,Married,High School,Artist,Urban,2,2,Never,1,9,3,Rarely,Vegetarian,Center,784
+49,85441,Female,Other,1,1,Single,Bachelor,Engineer,Suburban,3,4,Never,1,0,3,Daily,Vegetarian,Right,403
+65,93698,Non-binary,Black,3,1,Married,Bachelor,Engineer,Rural,2,9,Rarely,0,4,2,Weekly,Vegan,Left,751
+42,25415,Male,Hispanic,2,1,Married,PhD,Doctor,Rural,0,6,Often,1,9,4,Weekly,Vegetarian,Center,786
+57,56159,Female,Black,3,1,Married,High School,Artist,Rural,1,8,Often,0,8,3,Weekly,Non-Vegetarian,Left,638
+62,63925,Non-binary,Asian,4,0,Married,Master,Engineer,Suburban,4,2,Often,0,0,2,Daily,Vegan,Right,777
+18,25951,Female,Black,5,0,Married,Bachelor,Clerk,Rural,0,7,Rarely,0,0,0,Daily,Non-Vegetarian,Right,522
