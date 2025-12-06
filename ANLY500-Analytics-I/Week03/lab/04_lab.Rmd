@@ -1,8 +1,9 @@
 ---
 title: "Introduction to Data Analytics 2"
-author: "Enter Your Name"
+author: "Siddhesh Shinde"
 date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document: default
   word_document:
     reference_docx: default
 ---
@@ -35,69 +36,289 @@ Each participant was then measured on:
 
 1)	What would be one possible null hypothesis based on this study?
 
+One possible null hypothesis based on this study could be: 
+"There is no significant difference in the amount of money spent on products between consumers who purchase from the same retailer versus those who purchase from a different retailer, and there is no difference between online and in-store purchases."
+
 2)	What would be one possible alternative hypothesis based on this study?
+
+The alternative hypothesis based on this study could be: 
+"There is a significant difference in the amount of money spent on products based on where consumers purchase (online vs. store) and whether they purchase from the same or different retailer."
 
 3)	Who are they sampling in this study?
 
+The sample consists of consumers who engage in cross-channel shopping behavior when they inspect the products in physical store and potentially purchase either online or in-store, from either the same retailer or different retailer.
+
 4)	Who is the intended population in this study?
+
+The intended population is all consumers who browse products across different retail channels before making decisions.
 
 5)	Give an example of type 1 error based on this study (do not just define, explain in context how it might have happened here).
 
+A Type 1 error (False Positive) would occur if researchers concluded that purchasing channel (online or store) significantly affects money spent when, in reality, it doesn't.
+
+An example could be when the study might find that the customers who buy online from same retailer spend more money that those who buy from the store, leading the retailer to invest more in online promotions and inventory. However, if the difference was due to random chance or sampling issues, the retailer would waste resources on this strategy which was based on a false finding.
+ 
 6)	Give an example of type 2 error based on this study (do not just define, explain in context how it might have happened here).
+
+A Type 2 error (False Negative) would occur if the researchers failed to detect a real difference in spending behavior conditions.
+
+An example could be when the study might find that there is no significant difference in money spent between customers who pseudo-showroom at the same retailer versus those who switch to a different retailer. Based on this, the company doesn't implement strategy to retain people who visit their showrooms. However, if the study failed to detect the fact that same-retail shoppers do spend significantly more, the company misses an opportunity to optimize their omni-channel strategy and loses potential revenue.
 
 # Part 2: Use the 04_data.csv to complete this portion.
 
-```{r import-data}
+I have used `read_csv()` to load the dataset as `df` variable
 
+```{r import-data}
+df <- read.csv("04_data.csv")
+head(df)
 ```
 
 1)	For each IV list the levels (next to a, b):
 
+I have used `unique()` to get all unique values for `where_bought` and `who_bought` from the dataset
+
     a.	Where bought: 
+  
+    We get "online" and "store" as different levels for Where bought
+
+```{r}
+where_bought_levels <- unique(df$where_bought)
+where_bought_levels
+```
 
     b.	Who bought:
     
+    We get "different" and "same" as different levels for Who bought
+    
+```{r}
+who_bought_levels <- unique(df$who_bought)
+who_bought_levels
+```
+    
 2)	What are the conditions in this experiment?
+
+The conditions in this experiment are formed by the combinations of levels of independent variables. So the conditions are:
+
+* online and different
+
+* online and same
+
+* store and different
+
+* store and same
 
 3)	For each condition list the means, standard deviations, and standard error for the conditions for time and money spent. Please note that means you should have several sets of M, SD, and SE. Be sure you name the sets of means, sd, and se different things so you can use them later.
 
-```{r descriptives}
+I have imported `dplyr` package for performing data manipulation. Using the function `group_by()` and `summarise()` on `df`, I calculated mean, sd and se for time and money based on the conditions that we found above. 
 
+
+```{r descriptives}
+library(dplyr)
+
+# group statistics for time
+stats_time <- df %>%
+  group_by(where_bought, who_bought) %>%
+  summarise(
+    mean_time = mean(time, na.rm = TRUE),
+    sd_time = sd(time, na.rm = TRUE),
+    n = n(),
+    se_time = sd(time, na.rm = TRUE) / sqrt(n),
+    .groups = 'drop'
+  )
+
+# group statistics for money
+stats_money <- df %>%
+  group_by(where_bought, who_bought) %>%
+  summarise(
+    mean_money = mean(money, na.rm = TRUE),
+    sd_money = sd(money, na.rm = TRUE),
+    n = n(),
+    se_money = sd(money, na.rm = TRUE) / sqrt(n),
+    .groups = 'drop'
+  )
+
+print(stats_time)
+print(stats_money)
 ```
 
 4)	Which condition appears to have the best model fit using the mean as the model (i.e. smallest error) for time?
 
+I have used `filter()` with a condition where the SE of time is minimum and based on the output, we see that store-different appears to have best model fit.
+
+```{r}
+best_fit_time <- stats_time %>% filter(se_time == min(se_time))
+best_fit_time
+```
+
 5)	What are the df for each condition?
 
-```{r df}
+I have used `group_by()` and `summarise()` on `df` to get df for each out conditions i.e. n-1 which comes to 49 for all conditions.
 
+```{r df}
+condition_df <- df %>%
+  group_by(where_bought, who_bought) %>%
+  summarise(df = n() - 1, .groups = 'drop')
+condition_df
 ```
 
 6)	What is the confidence interval (95%) for the means?
 
-```{r conf-interval}
-##money
+I have used the formula `sample_mean +- z_95 * standard_error` to calculate lower and upper limit of Confidence Intervals of money and time. I have then combines the conditions `where_bought` and `who_bought` and used `ggplot2` library to plot the respective Confidence Intervals.
 
-##time
+```{r conf-interval}
+library(ggplot2)
+
+z_95 <- 1.96
+
+# Money
+confidence_interval_money <- stats_money %>%
+  mutate(
+    ci_lower_money = mean_money - z_95 * se_money,
+    ci_upper_money = mean_money + z_95 * se_money
+  )
+
+print(confidence_interval_money)
+
+ci_money_plot <- confidence_interval_money %>%
+  mutate(condition = paste(where_bought, who_bought, sep = "\n"))
+
+ggplot(ci_money_plot, aes(x = condition, y = mean_money)) +
+  geom_col(fill = "darkgreen", alpha = 0.7) +
+  geom_errorbar(aes(ymin = ci_lower_money, ymax = ci_upper_money),
+                width = 0.2, linewidth = 1) +
+  labs(title = "Mean Money Spent by Purchase Condition with 95% Confidence Intervals",
+       subtitle = "Non-overlapping CIs suggest significant differences",
+       x = "Purchase Condition", 
+       y = "Money Spent ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5))
+
+# Time
+confidence_interval_time <- stats_time %>%
+  mutate(
+    ci_lower_time = mean_time - z_95 * se_time,
+    ci_upper_time = mean_time + z_95 * se_time
+  )
+
+print(confidence_interval_time)
+
+ci_time_plot <- confidence_interval_time %>%
+  mutate(condition = paste(where_bought, who_bought, sep = "\n"))
+
+ggplot(ci_time_plot, aes(x = condition, y = mean_time)) +
+  geom_col(fill = "steelblue", alpha = 0.7) +
+  geom_errorbar(aes(ymin = ci_lower_time, ymax = ci_upper_time),
+                width = 0.2, linewidth = 1) +
+  labs(title = "Mean Time Spent by Purchase Condition with 95% Confidence Intervals",
+       subtitle = "Non-overlapping CIs suggest significant differences",
+       x = "Purchase Condition", 
+       y = "Time Spent (minutes)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5))
 
 ```
 
 7)	Use the MOTE library to calculate the effect size for the difference between money spent for the following comparisons (that means you'll have to do this twice):
 
+I have used `d.int.t()` from MOTE library to calculate effect size for the difference between money spent when:
+
+1. Store versus online when bought at the same retailer
+
+2. Store versus online when bought at a different retailer
+
+I have used the value of alpha = 0.05. We find out that d = -3.240354 for Same Retailer and d = -3.180373 for Different Retailer.
+
 ```{r MOTE}
-##Store versus online when bought at the same retailer
+library(MOTE)
 
-##Store versus online when bought at a different retailer
+alpha <- 0.05 # significance level
 
+# Store versus online when bought at the same retailer
+effect_money_same <- d.ind.t(
+  m1 = stats_money$mean_money[stats_money$where_bought == "online" & 
+                                stats_money$who_bought == "same"],
+  m2 = stats_money$mean_money[stats_money$where_bought == "store" & 
+                                stats_money$who_bought == "same"],
+  sd1 = stats_money$sd_money[stats_money$where_bought == "online" & 
+                               stats_money$who_bought == "same"],
+  sd2 = stats_money$sd_money[stats_money$where_bought == "store" & 
+                               stats_money$who_bought == "same"],
+  n1 = stats_money$n[stats_money$where_bought == "online" & 
+                       stats_money$who_bought == "same"],
+  n2 = stats_money$n[stats_money$where_bought == "store" & 
+                       stats_money$who_bought == "same"],
+  a = alpha
+)
+
+print("\nFor Same Retailer: \n")
+print(effect_money_same)
+
+# Store versus online when bought at a different retailer
+effect_money_different <- d.ind.t(
+  m1 = stats_money$mean_money[stats_money$where_bought == "online" & 
+                                stats_money$who_bought == "different"],
+  m2 = stats_money$mean_money[stats_money$where_bought == "store" & 
+                                stats_money$who_bought == "different"],
+  sd1 = stats_money$sd_money[stats_money$where_bought == "online" & 
+                               stats_money$who_bought == "different"],
+  sd2 = stats_money$sd_money[stats_money$where_bought == "store" & 
+                               stats_money$who_bought == "different"],
+  n1 = stats_money$n[stats_money$where_bought == "online" & 
+                       stats_money$who_bought == "different"],
+  n2 = stats_money$n[stats_money$where_bought == "store" & 
+                       stats_money$who_bought == "different"],
+  a = alpha
+)
+
+print("\nFor Different Retailer: \n")
+print(effect_money_different)
 ```
 
 8)	What can you determine about the effect size in the experiment - is it small, medium or large?
 
+For Cohen's d benchmarks:
+Small effect: |d| ~ 0.2
+Medium effect: |d| ~ 0.5
+Large effect: |d| >= 0.8
+
+Since the absolute value of d >= 0.8 in both cases, based on Cohen's benchmarks, both the cases have large effect.
+
 9)	How many people did we need in the study for each comparison?
 
 ```{r pwr}
-##Store versus online when bought at the same retailer
+library(pwr)
 
-##Store versus online when bought at a different retailer
+# Assume the required variables
+power <- 0.80
+alpha <- 0.05
 
+# For different retailer
+power_different <- pwr.t.test(
+  d = effect_money_different$d,  # expected effect size (medium)
+  power = power,               # desired statistical power
+  sig.level = alpha,           # prob of false positive
+  type = "two.sample",
+  alternative = "two.sided"
+)
+
+cat("\nDifferent Retailer Comparison\n")
+print(power_different)
+cat("Sample size needed per group:", ceiling(power_different$n), "\n")
+
+# For same retailer
+power_same <- pwr.t.test(
+  d = effect_money_same$d,  # expected effect size (medium)
+  power = power,               # desired statistical power
+  sig.level = alpha,           # prob of false positive
+  type = "two.sample",
+  alternative = "two.sided"
+)
+
+cat("\nSame Retailer Comparison\n")
+print(power_same)
+cat("Sample size needed per group:", ceiling(power_same$n), "\n")
 ```
+
+I have used `pwr.t.test` to calculate the required sample size for Cohen's d that we calculated above. Based on the test, we should have n = 3 people in each group to get standardized difference between two group means (Cohen's d)
