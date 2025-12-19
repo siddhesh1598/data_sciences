@@ -5,6 +5,7 @@
 .Rhistory
 .RData
 .Rproj.user
+.Ruserdata
 
 # IDE
 .vscode/
