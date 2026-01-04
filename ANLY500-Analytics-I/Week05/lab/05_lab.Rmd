@@ -1,8 +1,10 @@
 ---
 title: "Statistical Modeling and Graphing"
-author: "Enter Your Name"
+author: "Siddhesh Shinde"
 date: "`r Sys.Date()`"
-output: 
+output:
+  html_document:
+    df_print: paged
   word_document:
     reference_docx: default
 ---
@@ -114,53 +116,141 @@ Please note that each subpoint (i.e. a, b) indicates a different chart.
 
     a.	Sales at time 1
 
-```{r hist1}
+I have used `geom_histogram()` to plot the histogram of sales at time 1 with a binwidth of 0.5 with x-axis being Sales at Time 1 and y-axis being the frequency. 
+I have used `ggplot()` to plot the data and cleanup theme for graph.
 
+```{r hist1}
+ggplot(labdata, aes(x = time.1)) +
+  geom_histogram(binwidth = 0.5, color = "black", fill = "gray70") +
+  labs(title = "Sales at time 1",
+       x = "Sales at Time 1", 
+       y = "Frequency") +
+  cleanup
 ```
 
     b.	Sales at time 2
 
-```{r hist2}
+I have used `geom_histogram()` to plot the histogram of sales at time 2 with a binwidth of 0.5 with x-axis being Sales at Time 2 and y-axis being the frequency. 
+I have used `ggplot()` to plot the data and cleanup theme for graph.
 
+```{r hist2}
+ggplot(labdata, aes(x = time.2)) +
+  geom_histogram(binwidth = 0.5, color = "black", fill = "gray70") +
+  labs(title = "Sales at time 2", 
+       x = "Sales at time 2", 
+       y = "Frequency") +
+  cleanup
 ```
 
 2)	Make a bar chart with two independent variables:
 
     a.	Business focus, internet, DV: sales at time 2
 
-```{r bar1}
+I have used `ggplot()` to plot the data with the internet usage on x-axis, sales at time 2 on y-axis and fill as business focus. I have used `stat_summary()` to first calculate the mean of Sales at Time 2, internet usage and display it as bars plotted side-by-side and then to add confidence interval error.
 
+```{r bar1}
+bar_data <- ggplot(labdata, aes(x = internet, y = time.2, fill = biz_focus))
+
+bar_data + 
+  stat_summary(fun = mean,
+               geom = "bar",
+               position = "dodge") + 
+  stat_summary(fun.data = mean_cl_normal,
+               geom = "errorbar", 
+               position = position_dodge(width = 0.90),
+               width = 0.2) +
+  labs(title = "Time 2 Sales with respect to Business Focus and Internet",
+       x = "Internet Usage", 
+       y = "Sales at Time 2") +
+  cleanup + 
+  scale_fill_manual(values = c("gray30", "gray70"), name = "Business Focus")
 ```
 
 3)	Make a bar chart with two independent variables: 
 
     a.	Time (time 1, time 2), Business focus, DV: is sales from time 1 and 2
 
-```{r bar2}
+I have used `melt()` from `reshape2` package to create a new `Time` variable to combine time 1 and time 2. Used `factor()` to set levels as required. Then I have used `ggplot()` to plot the data with the Time period on x-axis, sales on y-axis and fill as business focus. I have used `stat_summary()` to first calculate the mean of sales, time period and display it as bars plotted side-by-side and then to add confidence interval error.
 
+```{r bar2}
+library(reshape2)
+
+long_data <- melt(labdata, 
+                  id.vars = c("id", "biz_focus", "internet"), 
+                  measure.vars = c("time.1", "time.2"),
+                  variable.name = "Time", 
+                  value.name = "Sales")
+
+long_data$Time <- factor(long_data$Time, 
+                         levels = c("time.1", "time.2"),
+                         labels = c("Time 1", "Time 2"))
+
+# Create the bar chart
+time_bar <- ggplot(long_data, aes(x = Time, y = Sales, fill = biz_focus))
+
+time_bar + 
+  stat_summary(fun = mean,
+               geom = "bar",
+               position = "dodge") + 
+  stat_summary(fun.data = mean_cl_normal,
+               geom = "errorbar", 
+               position = position_dodge(width = 0.90),
+               width = 0.2) +
+  labs(x = "Time Period", 
+       y = "Mean Sales Score") +
+  cleanup + 
+  scale_fill_manual(values = c("gray30", "gray70"), name = "Business Focus")
 ```
 
 4)	Make a simple line graph:
 
     a.	Time (time 1, time 2), DV: is sales from time 1 and 2 
 
-```{r line}
+I have used `long_data` with `Time` variable calculated above and `ggplot()` to plot the data. I have used `stat_summary()` to calculate mean of Time on x-axis as a line and points. I have also added add confidence interval error. 
 
+```{r line}
+ggplot(long_data, aes(x = Time, y = Sales, group = 1)) + 
+  stat_summary(fun = mean,
+               geom = "line",
+               size = 1) + 
+  stat_summary(fun = mean,
+               geom = "point",
+               size = 3) +
+  stat_summary(fun.data = mean_cl_normal,
+               geom = "errorbar", 
+               width = 0.1) +
+  labs(x = "Time Period", 
+       y = "Mean Sales Score") +
+  cleanup
 ```
 
 5)	Make a simple scatterplot:
     
     a.	Sales at Time 1, Time 2
 
-```{r scatter1}
+I have used `geom_point()` to create scatter points with size 2 and alpha 0.6 for transparency. Then I have used `geom_smooth()` to add a linear regression line to show the trend. se = FALSE removes the confidence band around the line.
 
+```{r scatter1}
+ggplot(labdata, aes(x = time.1, y = time.2)) +
+  geom_point(size = 2, alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linetype = "dashed") +
+  labs(x = "Sales at Time 1", 
+       y = "Sales at Time 2") +
+  cleanup
 ```
 
 6)	Make a grouped scatterplot:
 
     a.	Sales at time 1 and 2, Business focus
 
-```{r scatter2}
+I have used `geom_point()` to create scatter points with size 2.5 and alpha 0.7 for transparency. I have used `scale_shape_manual()` to use values 16 for filled circle and 1 for empty circle to indicate Business Focus data points.
 
+```{r scatter2}
+ggplot(labdata, aes(x = time.1, y = time.2, shape = biz_focus)) +
+  geom_point(size = 2.5, alpha = 0.7) +
+  scale_shape_manual(values = c(16, 1), name = "Business Focus") +
+  labs(x = "Sales at Time 1", 
+       y = "Sales at Time 2") +
+  cleanup
 ```
 
