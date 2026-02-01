@@ -1,0 +1,179 @@
+---
+title: "Answer 01 - Siddhesh Shinde"
+output:
+  word_document: default
+---
+
+```{r}
+# Load required packages
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(moments)
+library(ggplot2)
+library(dplyr)
+library(seedhash)
+
+# Set reproducible seed
+gen <- SeedHashGenerator$new("Siddhesh")
+seeds <- gen$generate_seeds(5)
+set.seed(seeds[2])
+```
+
+---
+
+The structure of the data and a preview of the data.
+
+```{r}
+iris_data <- read.csv("iris_exams.csv")
+
+# Display basic information
+cat("Dataset successfully loaded!\n")
+cat("Number of rows:", nrow(iris_data), "\n")
+cat("Number of columns:", ncol(iris_data), "\n")
+```
+
+```{r}
+# Structure of the data
+str(iris_data)
+
+cat("\nColumn names:\n")
+print(names(iris_data))
+
+cat("\nData types summary:\n")
+sapply(iris_data, class)
+```
+
+```{r}
+# First 6 rows
+head(iris_data) %>%
+  kable(caption = "First 6 Rows of Iris Dataset")
+
+# Last 6 rows
+tail(iris_data) %>%
+  kable(caption = "Last 6 Rows of Iris Dataset")
+```
+
+---
+
+Frequency Distribution. (Frequency Tables & Plots for each variable in the dataset (Barplots/Histograms)). Make sure to capture the skewness and kurtosis. - Provide an interpretation in one paragraph  (no more than 300 words) explaining the distribution of the data. 
+
+```{r}
+# Frequency table 
+if("Species" %in% names(iris_data)) {
+  species_freq <- table(iris_data$Species)
+  cat("\nFrequency Table for Species:\n")
+  print(species_freq)
+  
+  species_freq_df <- as.data.frame(species_freq)
+  colnames(species_freq_df) <- c("Species", "Frequency")
+  
+  species_freq_df %>%
+    kable(caption = "Frequency Distribution of Species")
+}
+```
+
+```{r}
+# Histogram
+numeric_cols <- names(iris_data)[sapply(iris_data, is.numeric)]
+
+for(col in numeric_cols) {
+  p <- ggplot(iris_data, aes_string(x = col)) +
+    geom_histogram(bins = 20, fill = "steelblue", color = "white", alpha = 0.8) +
+    geom_density(aes(y = ..count..), color = "red", linewidth = 1) +
+    labs(title = paste("Distribution of", col),
+         x = col,
+         y = "Frequency") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  
+  print(p)
+}
+```
+
+```{r}
+# Barplot
+
+if("Species" %in% names(iris_data)) {
+  ggplot(iris_data, aes(x = Species, fill = Species)) +
+    geom_bar(alpha = 0.8) +
+    geom_text(stat = 'count', aes(label = ..count..), vjust = -0.5) +
+    labs(title = "Frequency Distribution of Species",
+         x = "Species",
+         y = "Count") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_fill_brewer(palette = "Set2")
+}
+```
+
+```{r}
+# Skewness and Kurtosis
+
+skew_kurt_results <- data.frame(
+  Variable = numeric_cols,
+  Skewness = sapply(numeric_cols, function(col) skewness(iris_data[[col]], na.rm = TRUE)),
+  Kurtosis = sapply(numeric_cols, function(col) kurtosis(iris_data[[col]], na.rm = TRUE))
+)
+
+rownames(skew_kurt_results) <- NULL
+
+skew_kurt_results %>%
+  kable(caption = "Skewness and Kurtosis Statistics", digits = 3)
+
+for (i in 1:nrow(skew_kurt_results)) {
+  var_name <- skew_kurt_results$Variable[i]
+  skewness_val <- skew_kurt_results$Skewness[i]
+  kurtosis_val <- skew_kurt_results$Kurtosis[i]
+
+  cat("\n", var_name, ":\n", sep = "")
+  
+  # Skewness interpretation
+  cat("Interpretation:", 
+    ifelse(abs(skewness_val) < 0.5, "Approximately Symmetric",
+           ifelse(skewness_val > 0, "Right-skewed (Positive)", "Left-skewed (Negative)")), "\n")
+  
+  # Kurtosis interpretation
+  cat("Interpretation:",
+    ifelse(kurtosis_val > 3, "Leptokurtic (heavy tails)",
+           ifelse(kurtosis_val < 3, "Platykurtic (light tails)", "Mesokurtic (normal)")), "\n")
+  
+  cat("\n")
+}
+```
+
+---
+
+Summary Statistics of the Data at least including mean, quartiles, min/max, and standard deviation. 
+
+```{r}
+summary(iris_data)
+```
+
+
+```{r}
+# More detailed summary by species
+iris_detailed <- iris_data %>%
+  group_by(Species) %>%
+  summarise(
+    N = n(),
+    Mean_Sepal_Length = mean(Sepal.Length),
+    SD_Sepal_Length = sd(Sepal.Length),
+    Mean_Sepal_Width = mean(Sepal.Width),
+    SD_Sepal_Width = sd(Sepal.Width),
+    Mean_Petal_Length = mean(Petal.Length),
+    SD_Petal_Length = sd(Petal.Length)
+  ) %>%
+  mutate(across(where(is.numeric), ~round(., 2)))
+
+iris_detailed %>%
+  kable(caption = "Detailed Summary by Species")
+```
+
+---
+
+
+DISTRIBUTION INTERPRETATION:
+
+The given Iris dataset contains measurements of flower characteristics across 3 different species (Setosa, Versicolor and Virginica). The numerical variables (Sepal Length, Sepal Width, Petal Length, and Petal Width) show varying  degrees of skewness and kurtosis. Based on the frequency distribution histogram, the variable Sepal Width is the only variable with single peak whereas rest of the variables have multipeaks. As for the skewness and kurtosis test, the Sepal Width variable was again an odd man out with being right-skewed and having heavy tails whereas rest all variables have approximitly symmetric skewness and light tails.

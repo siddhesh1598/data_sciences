@@ -1,0 +1,157 @@
+
+Additivity
+
+```{r}
+# Build models with and without interactions
+model_additive <- lm(mpg ~ cyl + hp + wt, data = mtcars_clean)
+model_interaction <- lm(mpg ~ cyl * hp * wt, data = mtcars_clean)
+
+# Compare models using ANOVA
+cat("### Model Comparison: Additive vs. Interaction Model\n\n")
+anova_result <- anova(model_additive, model_interaction)
+print(anova_result)
+
+cat("\n### Interpretation:\n")
+p_value <- anova_result$`Pr(>F)`
+if(!is.na(p_value) && p_value < 0.05) {
+  cat("p-value =", round(p_value, 4), "< 0.05\n")
+  cat("**Conclusion:** Interaction terms are significant. Additivity assumption is VIOLATED.\n")
+  cat("However, for simplicity, we proceed with additive model but acknowledge limitations.\n")
+} else {
+  cat("p-value =", round(p_value, 4), "> 0.05\n")
+  cat("**Conclusion:** Interaction terms are NOT significant. Additivity assumption is MET.\n")
+  cat("Variables combine additively in predicting MPG.\n")
+}
+
+# Visualize potential interactions
+ggplot(mtcars_clean, aes(x = wt, y = mpg, color = factor(cyl))) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Interaction Check: Weight × Cylinders on MPG",
+       x = "Weight (1000 lbs)",
+       y = "Miles per Gallon",
+       color = "Cylinders") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+```
+
+Linearity
+
+```{r}
+# Scatter plots for each IV vs DV
+p1 <- ggplot(mtcars_clean, aes(x = cyl, y = mpg)) +
+  geom_point(size = 3, color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "MPG vs. Cylinders",
+       x = "Number of Cylinders",
+       y = "Miles per Gallon") +
+  theme_minimal()
+
+p2 <- ggplot(mtcars_clean, aes(x = hp, y = mpg)) +
+  geom_point(size = 3, color = "darkgreen", alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "MPG vs. Horsepower",
+       x = "Horsepower",
+       y = "Miles per Gallon") +
+  theme_minimal()
+
+p3 <- ggplot(mtcars_clean, aes(x = wt, y = mpg)) +
+  geom_point(size = 3, color = "purple", alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "MPG vs. Weight",
+       x = "Weight (1000 lbs)",
+       y = "Miles per Gallon") +
+  theme_minimal()
+
+grid.arrange(p1, p2, p3, nrow = 2,
+             top = "Linearity Assessment: Scatter Plots with Linear Fit")
+
+# Correlation matrix
+cat("\n### Correlation Analysis:\n")
+cor_matrix <- cor(mtcars_clean %>% select(mpg, cyl, hp, wt))
+print(round(cor_matrix, 3))
+
+# Visualize correlation matrix
+corrplot(cor_matrix, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45,
+         title = "Correlation Matrix: Linearity Assessment",
+         mar = c(0,0,2,0))
+
+```
+
+```{r}
+cat("\n### Linearity Interpretation:\n\n")
+cat("Correlation coefficients:\n")
+cat("- mpg ~ cyl: r =", round(cor(mtcars_clean$mpg, mtcars_clean$cyl), 3), "\n")
+cat("- mpg ~ hp:  r =", round(cor(mtcars_clean$mpg, mtcars_clean$hp), 3), "\n")
+cat("- mpg ~ wt:  r =", round(cor(mtcars_clean$mpg, mtcars_clean$wt), 3), "\n\n")
+
+cat("All correlations are substantial (|r| > 0.7), indicating strong linear relationships.\n")
+cat("Scatter plots show relatively linear patterns without obvious curvilinear trends.\n\n")
+cat("**Conclusion:** Linearity assumption is REASONABLY MET.\n")
+
+```
+
+Normality
+
+```{r}
+# Fit the regression model
+model <- lm(mpg ~ cyl + hp + wt, data = mtcars_clean)
+
+# Extract residuals
+residuals <- residuals(model)
+
+# Shapiro-Wilk test
+shapiro_test <- shapiro.test(residuals)
+
+cat("### Shapiro-Wilk Normality Test:\n")
+cat("Test Statistic (W):", round(shapiro_test$statistic, 4), "\n")
+cat("p-value:", round(shapiro_test$p.value, 4), "\n\n")
+
+if(shapiro_test$p.value > 0.05) {
+  cat("**Conclusion:** p >0.05. We FAIL TO REJECT the null hypothesis.\n")
+  cat("Residuals are approximately normally distributed. Normality assumption is MET.\n")
+} else {
+  cat("**Conclusion:** p < 0.05. We REJECT the null hypothesis.\n")
+  cat("Residuals deviate from normality. Normality assumption is VIOLATED.\n")
+  cat("Note: With small sample sizes (n=32), minor deviations are common.\n")
+}
+
+```
+
+```{r}
+# Q-Q plot
+par(mfrow = c(2, 2))
+
+# Q-Q plot
+qqnorm(residuals, main = "Q-Q Plot: Normality Assessment")
+qqline(residuals, col = "red", lwd = 2)
+
+# Histogram of residuals
+hist(residuals, breaks = 10, col = "lightblue", border = "black",
+     main = "Histogram of Residuals",
+     xlab = "Residuals", prob = TRUE)
+lines(density(residuals), col = "red", lwd = 2)
+curve(dnorm(x, mean = mean(residuals), sd = sd(residuals)), 
+      add = TRUE, col = "blue", lwd = 2, lty = 2)
+legend("topright", c("Actual", "Normal"), col = c("red", "blue"), 
+       lty = c(1, 2), lwd = 2)
+
+# Residuals vs Fitted
+plot(fitted(model), residuals,
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 19, col = "darkgreen")
+abline(h = 0, col = "red", lwd = 2, lty = 2)
+
+# Box plot of residuals
+boxplot(residuals, col = "lightyellow", main = "Boxplot of Residuals",
+        ylab = "Residuals")
+abline(h = 0, col = "red", lwd = 2, lty = 2)
+
+par(mfrow = c(1, 1))
+
+```
+
+Homogeneity and Homoscedasticity

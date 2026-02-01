@@ -1,0 +1,489 @@
+---
+title: "Answer 02 - Siddhesh Shinde"
+output:
+  word_document: default
+---
+
+```{r}
+# Load required packages
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(moments)
+library(lmtest)
+library(ggplot2)
+library(gridExtra)
+library(corrplot)
+library(car)
+library(seedhash)
+
+# Set reproducible seed
+gen <- SeedHashGenerator$new("Siddhesh")
+seeds <- gen$generate_seeds(5)
+set.seed(seeds[2])
+
+data("mtcars")
+```
+
+```{r}
+help(mtcars)
+```
+
+```{r}
+head(mtcars, 10) %>%
+  kable(caption = "First 10 Rows of mtcars Dataset")
+
+cat("\nBasic Summary Statistics:\n")
+summary(mtcars)
+```
+
+
+--- 
+
+Develop a hypothesis
+
+Hypothesis: "Vehicle fuel efficiency (miles per gallon) is significantly predicted by vehicle weight, number of cylinders and horsepower after controlling for other vehicle characteristics."
+
+Based on the data and above hypothesis, we can consider the following:
+
+Dependent Variable: 
+  mpg   Miles/(US) gallon
+  
+Independent Variables:
+  wt    Weight (1000 lbs)
+  cyl   Number of cylinders
+  hp    Gross horsepower
+
+Ignorable Columns:
+  disp	Displacement (cu.in.)
+  drat	Rear axle ratio
+  qsec	1/4 mile time
+  vs	  Engine 
+  am	  Transmission
+	gear	Number of forward gears
+  carb	Number of carburetors
+  
+We can ignore these above columns because our hypothesis is only concerned with the relation between a car's fuel efficiency (mpg) and its weight (wt), number of cylinder (cyl) and horsepower (hp).
+
+---
+
+Check for Errors & Missing Data
+
+```{r}
+# Check for missing values
+missing_count <- colSums(is.na(mtcars))
+missing_percent <- round(colSums(is.na(mtcars)) / nrow(mtcars) * 100, 2)
+
+missing_summary <- data.frame(
+  Variable = names(missing_count),
+  Missing_Count = missing_count,
+  Missing_Percent = missing_percent
+)
+
+missing_summary %>%
+  kable(caption = "Missing Data Summary")
+
+cat("\nConclusion: The mtcars dataset contains NO missing values (0 NAs).\n")
+cat("Therefore, no imputation or deletion strategies are required.\n")
+```
+
+
+```{r}
+# Check for duplicate rows
+duplicates <- sum(duplicated(mtcars))
+cat("Number of duplicate records:", duplicates, "\n")
+cat("\nConclusion: No duplicate records found.\n")
+```
+
+
+```{r}
+# Select relevant variables for analysis
+mtcars_subset <- mtcars %>% select(mpg, cyl, hp, wt)
+
+detect_errors <- function(var, var_name) {
+  # Create a temporary data frame with the variable
+  temp_df <- data.frame(value = var)
+  
+  # Histogram to see distribution shape
+  p3 <- ggplot(temp_df, aes(x = value)) +
+    geom_histogram(fill = "orange", color = "black", bins = 30) +
+    labs(title = paste("Histogram of", var_name),
+         x = var_name, 
+         y = "Frequency") +
+    theme_minimal()
+  
+  # Boxplot to see outliers clearly
+  p4 <- ggplot(temp_df, aes(y = value)) +
+    geom_boxplot(fill = "orange", alpha = 0.5) +
+    labs(title = paste("Boxplot of", var_name),
+         y = var_name) +
+    theme_minimal()
+  
+  # Arrange and print the plots
+  grid.arrange(p3, p4, ncol = 2)
+}
+
+# Detect error for each variable
+for(var_name in names(mtcars_subset)) {
+  detect_errors(mtcars_subset[[var_name]], var_name)
+}
+```
+
+
+
+--- 
+
+Clean the data
+
+```{r}
+apply(mtcars_subset, 2, function(x) { sum(is.na(x)) })
+```
+
+The mtcars dataset do not have any missing data. If it had missing data, we can handle it by either 
+
+Checking percentage of missing data per participant:
+  We can create subsets: 
+    - Replaceable: Participants with ≤5% missing data. 
+    - Not Replaceable: Participants with >5% missing data (often excluded or analyzed separately).
+    
+Multiple Imputation with mice:
+  MICE (Multivariate Imputation by Chained Equations) helps guess the missing values based on relationship with other variables.
+  
+Univariate Outlier Detection:
+
+```{r}
+# Function to detect outliers using IQR method
+detect_outliers_iqr <- function(x) {
+  Q1 <- quantile(x, 0.25, na.rm = TRUE)
+  Q3 <- quantile(x, 0.75, na.rm = TRUE)
+  IQR <- Q3 - Q1
+  lower_bound <- Q1 - 1.5 * IQR
+  upper_bound <- Q3 + 1.5 * IQR
+  
+  outliers <- x < lower_bound | x > upper_bound
+  return(list(outliers = outliers, 
+              lower = lower_bound, 
+              upper = upper_bound,
+              count = sum(outliers)))
+}
+
+# Detect outliers for each variable
+outlier_results <- lapply(mtcars_subset, detect_outliers_iqr)
+
+# Create summary table
+outlier_summary <- data.frame(
+  Variable = names(outlier_results),
+  Lower_Bound = sapply(outlier_results, function(x) round(x$lower, 2)),
+  Upper_Bound = sapply(outlier_results, function(x) round(x$upper, 2)),
+  Outlier_Count = sapply(outlier_results, function(x) x$count),
+  Outlier_Percentage = round(sapply(outlier_results, function(x) x$count) / nrow(mtcars) * 100, 2)
+)
+
+outlier_summary %>%
+  kable(caption = "Outlier Detection Summary (IQR Method: 1.5 × IQR)")
+
+```
+Multivariate Outlier Detection:
+
+```{r}
+# Select only continuous variables for outlier check
+cont_vars <- mtcars_subset %>% select(mpg, hp, wt)
+
+# Calculate distance
+mahal <- mahalanobis(cont_vars,
+                    colMeans(cont_vars, na.rm=TRUE),
+                    cov(cont_vars, use ="pairwise.complete.obs"))
+```
+
+```{r}
+cutoff <- qchisq(1 - .005, ncol(cont_vars))
+
+cat("Degrees of Freedom:", ncol(cont_vars), "\n")
+cat("Cutoff Value:", cutoff, "\n")
+summary(mahal < cutoff)
+```
+
+```{r}
+# Create a data frame for plotting
+outlier_plot <- data.frame(
+  ID = 1:length(mahal),
+  Distance = mahal,
+  Outlier = mahal > cutoff
+)
+
+ggplot(outlier_plot, aes(x = ID, y = Distance, color = Outlier)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_hline(yintercept = cutoff, linetype = "dashed", color = "red") +
+  geom_text(aes(label = ifelse(Outlier, ID, "")), vjust = -0.5, show.legend = FALSE) +
+  labs(title = "Mahalanobis Distances",
+       subtitle = paste("Points above the red line (Cutoff =", round(cutoff, 2), ") are multivariate outliers"),
+       y = "Distance (D^2)",
+       x = "Participant ID") +
+  theme_minimal() +
+  scale_color_manual(values = c("black", "red"))
+```
+
+```{r}
+# Eliminate outliers
+mtcars_without_outliers <- subset(mtcars_subset, mahal < cutoff)
+
+cat("\nDimensions before outlier removal:", dim(mtcars_subset)[1], "\n")
+cat("Dimensions after outlier removal:", dim(mtcars_without_outliers)[1], "\n")
+```
+
+We found few outliers in the Univariate example using IQR test and no outliers based on Multivariate test using alpha of 0.05
+
+```{r}
+# Remove IQR outliers
+remove_outliers_iqr <- function(data, columns) {
+  
+  is_outlier <- function(x) {
+    Q1 <- quantile(x, 0.25, na.rm = TRUE)
+    Q3 <- quantile(x, 0.75, na.rm = TRUE)
+    IQR <- Q3 - Q1
+    lower <- Q1 - 1.5 * IQR
+    upper <- Q3 + 1.5 * IQR
+    return(x < lower | x > upper)
+  }
+  
+  outlier_flags <- sapply(data[, columns], is_outlier)
+  any_outlier <- apply(outlier_flags, 1, any)
+  
+  cat("Outlier Detection Summary:\n")
+  cat("-------------------------\n")
+  for(col in columns) {
+    n_outliers <- sum(outlier_flags[, col])
+    cat(sprintf("%-10s: %2d outliers\n", col, n_outliers))
+  }
+  cat("-------------------------\n")
+  cat("Total rows with any outlier:", sum(any_outlier), "\n")
+  cat("Rows to keep:", sum(!any_outlier), "\n\n")
+  
+  return(data[!any_outlier, ])
+}
+
+# Use the function
+mtcars_clean <- remove_outliers_iqr(mtcars_subset, c("mpg", "cyl", "hp", "wt"))
+
+```
+
+---
+
+Check Assumptions using Parametric Tests
+
+Additivity:
+
+```{r}
+# Select only continuous variables for correlation check
+cont_vars_for_cor <- mtcars_clean %>% 
+  select(mpg, hp, wt)
+
+# Calculate correlation matrix
+cor_matrix <- cor(cont_vars_for_cor)
+
+# Display correlation matrix
+cor_matrix %>%
+  kable(caption = "Correlation Matrix of Continuous Variables", digits = 3)
+
+# Create a correlation plot
+corrplot(cor_matrix, 
+         method = "color",
+         type = "upper",
+         order = "hclust",
+         addCoef.col = "black",
+         number.cex = 0.7,
+         tl.col = "black",
+         tl.srt = 45,
+         title = "Correlation Matrix: Checking for Multicollinearity",
+         mar = c(0,0,2,0))
+
+# Add interpretation guide
+legend("bottomright", 
+       legend = c("r > 0.90: CONCERN", "r > 0.80: Monitor", "r < 0.80: OK"),
+       fill = c("darkred", "orange", "lightblue"),
+       cex = 0.8)
+```
+
+```{r}
+# Find high correlations (excluding diagonal)
+high_cor <- which(abs(cor_matrix) > 0.80 & abs(cor_matrix) < 1, arr.ind = TRUE)
+
+if(nrow(high_cor) > 0) {
+  cat("⚠ WARNING: Found", nrow(high_cor)/2, "pairs with correlations > 0.80:\n\n")
+  for(i in 1:nrow(high_cor)) {
+    if(high_cor[i,1] < high_cor[i,2]) {  # Avoid duplicates
+      var1 <- rownames(cor_matrix)[high_cor[i,1]]
+      var2 <- colnames(cor_matrix)[high_cor[i,2]]
+      cor_val <- cor_matrix[high_cor[i,1], high_cor[i,2]]
+      cat(sprintf("  %s <-> %s: r = %.3f\n", var1, var2, cor_val))
+    }
+  }
+  cat("\nConsider combining these variables or selecting one from each pair.\n")
+} else {
+  cat("✓ GOOD: No correlations exceed 0.80.\n")
+  cat("  Multicollinearity is not a concern based on correlations.\n")
+}
+```
+
+Since mpg and wt have string correlation, we remove wt from out dataset.
+
+```{r}
+mtcars_additive <- mtcars_clean %>% select(mpg, cyl, hp)
+```
+
+Linearity:
+
+```{r}
+# Scatter plots for each IV vs DV
+p1 <- ggplot(mtcars_additive, aes(x = cyl, y = mpg)) +
+  geom_point(size = 3, color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "MPG vs. Cylinders",
+       x = "Number of Cylinders",
+       y = "Miles per Gallon") +
+  theme_minimal()
+
+p2 <- ggplot(mtcars_additive, aes(x = hp, y = mpg)) +
+  geom_point(size = 3, color = "darkgreen", alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "MPG vs. Horsepower",
+       x = "Horsepower",
+       y = "Miles per Gallon") +
+  theme_minimal()
+
+grid.arrange(p1, p2, nrow = 2,
+             top = "Linearity Assessment: Scatter Plots with Linear Fit")
+```
+
+```{r}
+cat("\n### Linearity Interpretation:\n\n")
+cat("Correlation coefficients:\n")
+cat("- mpg ~ cyl: r =", round(cor(mtcars_additive$mpg, mtcars_additive$cyl), 3), "\n")
+cat("- mpg ~ hp:  r =", round(cor(mtcars_additive$mpg, mtcars_additive$hp), 3), "\n")
+
+cat("All correlations are substantial (|r| > 0.7), indicating strong linear relationships.\n")
+cat("Scatter plots show relatively linear patterns without obvious curvilinear trends.\n\n")
+cat("Conclusion: Linearity assumption is REASONABLY MET.\n")
+
+```
+
+Normality:
+
+```{r}
+# Fit the regression model
+model <- lm(mpg ~ cyl + hp, data = mtcars_additive)
+
+# Extract residuals
+residuals <- residuals(model)
+
+# Shapiro-Wilk test
+shapiro_test <- shapiro.test(residuals)
+
+cat("### Shapiro-Wilk Normality Test:\n")
+cat("Test Statistic (W):", round(shapiro_test$statistic, 4), "\n")
+cat("p-value:", round(shapiro_test$p.value, 4), "\n\n")
+
+if(shapiro_test$p.value > 0.05) {
+  cat("Conclusion: p >0.05. We FAIL TO REJECT the null hypothesis.\n")
+  cat("Residuals are approximately normally distributed. Normality assumption is MET.\n")
+} else {
+  cat("Conclusion: p < 0.05. We REJECT the null hypothesis.\n")
+  cat("Residuals deviate from normality. Normality assumption is VIOLATED.\n")
+  cat("Note: With small sample sizes (n=32), minor deviations are common.\n")
+}
+```
+
+```{r}
+# Q-Q plot
+par(mfrow = c(2, 2))
+
+# Q-Q plot
+qqnorm(residuals, main = "Q-Q Plot: Normality Assessment")
+qqline(residuals, col = "red", lwd = 2)
+
+# Histogram of residuals
+hist(residuals, breaks = 10, col = "lightblue", border = "black",
+     main = "Histogram of Residuals",
+     xlab = "Residuals", prob = TRUE)
+lines(density(residuals), col = "red", lwd = 2)
+curve(dnorm(x, mean = mean(residuals), sd = sd(residuals)), 
+      add = TRUE, col = "blue", lwd = 2, lty = 2)
+legend("topright", c("Actual", "Normal"), col = c("red", "blue"), 
+       lty = c(1, 2), lwd = 2)
+
+# Residuals vs Fitted
+plot(fitted(model), residuals,
+     main = "Residuals vs. Fitted Values",
+     xlab = "Fitted Values", ylab = "Residuals",
+     pch = 19, col = "darkgreen")
+abline(h = 0, col = "red", lwd = 2, lty = 2)
+
+# Box plot of residuals
+boxplot(residuals, col = "lightyellow", main = "Boxplot of Residuals",
+        ylab = "Residuals")
+abline(h = 0, col = "red", lwd = 2, lty = 2)
+
+par(mfrow = c(1, 1))
+```
+
+Homogeneity and Homoscedasticity:
+
+```{r}
+# Extract standardized fitted values
+fitvalues <- scale(model$fitted.values)
+standardized <- rstudent(model)
+
+# Create enhanced residual plot
+plot_data <- data.frame(
+  Fitted = as.numeric(fitvalues),
+  Residuals = standardized,
+  Outlier = abs(standardized) > 2
+)
+
+ggplot(plot_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(aes(color = Outlier), size = 2, alpha = 0.6) +
+  geom_hline(yintercept = 0, color = "red", linewidth = 1) +
+  geom_vline(xintercept = 0, color = "red", linewidth = 1) +
+  geom_hline(yintercept = c(-2, 2), linetype = "dashed", color = "blue") +
+  geom_smooth(method = "loess", se = TRUE, color = "darkgreen", linewidth = 1) +
+  scale_color_manual(values = c("FALSE" = "black", "TRUE" = "red"),
+                     labels = c("Within ±2", "Outside ±2")) +
+  labs(title = "Residual Plot: Checking Homoscedasticity",
+       subtitle = "Points should be randomly scattered with equal spread across X-axis",
+       x = "Standardized Fitted Values",
+       y = "Standardized Residuals",
+       color = "Status") +
+  annotate("text", x = min(plot_data$Fitted, na.rm=TRUE), y = 3,
+           label = "✓ GOOD: Random scatter\n✗ BAD: Funnel, curve, or clusters",
+           hjust = 0, vjust = 1, color = "darkgreen", size = 3.5) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+levene_cyl <- leveneTest(mtcars_additive$mpg, mtcars_additive$cyl, center = median)
+print(levene_cyl)
+
+if(levene_cyl$`Pr(>F)`[1] > 0.05) {
+  cat("✓ GOOD: Levene's test p-value =", round(levene_cyl$`Pr(>F)`[1], 4), "\n")
+  cat("  Variances are not significantly different across Number of Cylinders.\n")
+} else {
+  cat("⚠ WARNING: Levene's test p-value =", round(levene_cyl$`Pr(>F)`[1], 4), "\n")
+  cat("  Variances are significantly different across Number of Cylinders.\n")
+  cat("  Consider using Welch's correction or non-parametric tests.\n")
+}
+
+levene_hp <- leveneTest(mtcars_additive$mpg, mtcars_additive$hp, center = median)
+print(levene_hp)
+
+if(levene_hp$`Pr(>F)`[1] > 0.05) {
+  cat("✓ GOOD: Levene's test p-value =", round(levene_hp$`Pr(>F)`[1], 4), "\n")
+  cat("  Variances are not significantly different across Horsepower.\n")
+} else {
+  cat("⚠ WARNING: Levene's test p-value =", round(levene_hp$`Pr(>F)`[1], 4), "\n")
+  cat("  Variances are significantly different across Horsepower.\n")
+  cat("  Consider using Welch's correction or non-parametric tests.\n")
+}
+```
+
+Levene’s Test for Homogeneity suggest that we should use Welch's correction or non-parametric tests for our Independent Variables cyl and hp.

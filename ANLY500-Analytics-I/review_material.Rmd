@@ -1,0 +1,90 @@
+---
+title: "ANLY 500: Review Material"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Week 02: R for Data Analytics
+
+## Part 1: Understanding Data Types
+
+```{r}
+# Numeric (continuous) variables
+age <- 25
+height <- 175.5
+
+# Integer variables
+year <- 2025L
+
+# Character (string) variables
+name <- "John Doe"
+
+# Logical (boolean) variables
+is_student <- TRUE
+
+# Factor (categorical) variables
+education_level <- factor(c("High School", "Bachelor", "Master", "PhD"))
+grade <- factor(c("A", "B", "C", "D", "F"), ordered = TRUE)
+
+# Check variable types
+cat("Type of age:", class(age), "\n")
+```
+
+
+```{r}
+# Categorical Variables
+
+# 1. Binary variable example: Pass/Fail
+pass_fail <- c("Pass", "Fail", "Pass", "Pass", "Fail")
+pass_fail_factor <- factor(pass_fail)
+
+cat("Binary variable levels:", levels(pass_fail_factor), "\n")
+
+
+# 2. Nominal: Categories without order
+departments <- factor(c("HR", "IT", "Finance", "Marketing", "IT", "HR", "Finance"))
+
+cat("Department frequency:\n")
+table(departments)
+
+# 3. Ordinal: Categories with logical order
+satisfaction <- factor(
+  c("Very Unsatisfied", "Unsatisfied", "Neutral", "Satisfied", "Very Satisfied",
+    "Satisfied", "Neutral", "Very Satisfied", "Satisfied", "Unsatisfied"),
+  levels = c("Very Unsatisfied", "Unsatisfied", "Neutral", "Satisfied", "Very Satisfied"),
+  ordered = TRUE
+)
+
+cat("Satisfaction levels:\n")
+```
+
+
+```{r}
+# Continuous Variables
+
+# 1. Interval: Equal intervals but no true zero (e.g., temperature in Celsius)
+temperatures <- c(15, 18, 22, 25, 20, 16, 19, 23, 21, 17) # Note: 0°C doesn't mean "no temperature"
+
+# 2. Ratio: Equal intervals AND true zero (e.g., height, weight, income)
+heights <- c(160, 175, 182, 168, 155, 190, 172, 165, 178, 185)
+```
+
+
+
+## Part 2: Descriptive Analytics
+
+```{r}
+# Descriptive analysis summarizes and describes the main features of a dataset using measures of central tendency (mean, median, mode) and measures of spread (variance, standard deviation, range). It provides an overview of what the data looks like through summary statistics without making inferences or predictions beyond the data itself. Common tools include frequency distributions, summary tables, and basic visualizations like histograms and bar charts.
+```
+
+
+```{r}
+
+```
+
+
+---
+
+
+

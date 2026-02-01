@@ -1,0 +1,90 @@
+---
+title: "Answer 03 - Siddhesh Shinde"
+output:
+  word_document: default
+---
+
+```{r}
+# Load required packages
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(seedhash)
+
+# Set reproducible seed
+gen <- SeedHashGenerator$new("Siddhesh")
+seeds <- gen$generate_seeds(5)
+set.seed(seeds[2])
+```
+
+
+```{r}
+# Load dataset
+iris_data <- read.csv("iris_exams.csv")
+```
+
+
+```{r}
+# Calculate mean Sepal Length by Species
+sepal_summary <- iris_data %>%
+  group_by(Species) %>%
+  summarise(
+    Mean_Sepal_Length = mean(Sepal.Length, na.rm = TRUE),
+    SD = sd(Sepal.Length, na.rm = TRUE),
+    SE = SD / sqrt(n()),
+    .groups = 'drop'
+  )
+```
+
+
+```{r}
+# Create bar graph
+ggplot(sepal_summary, aes(x = Species, y = Mean_Sepal_Length, fill = Species)) +
+  geom_bar(stat = "identity", color = "black", alpha = 0.8, width = 0.7) +
+  geom_errorbar(aes(ymin = Mean_Sepal_Length - SE, 
+                    ymax = Mean_Sepal_Length + SE),
+                width = 0.2, linewidth = 0.8) +
+  geom_text(aes(label = round(Mean_Sepal_Length, 2)), 
+            vjust = -0.5, size = 5, fontface = "bold") +
+  labs(
+    title = "Comparison of Mean Sepal Length Across Iris Species",
+    x = "Iris Species",
+    y = "Mean Sepal Length (cm)"
+  ) +
+  scale_fill_manual(values = c("setosa" = "#FF6B6B", 
+                                "versicolor" = "#4ECDC4", 
+                                "virginica" = "#95E1D3")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 12),
+    legend.position = "right",
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.text = element_text(size = 11),
+    panel.grid.major.x = element_blank()
+  ) +
+  ylim(0, max(sepal_summary$Mean_Sepal_Length) * 1.15)
+```
+
+
+```{r}
+print(sepal_summary)
+```
+
+
+```{r}
+# Determine which species has the greatest Sepal Length
+greatest_species <- sepal_summary %>%
+  filter(Mean_Sepal_Length == max(Mean_Sepal_Length)) %>%
+  pull(Species)
+
+cat("\nSpecies with the greatest mean Sepal Length:", greatest_species, "\n")
+```
+
+---
+
+INTERPRETATION:
+
+The bar graph reveals distinct differences in sepal length across the three iris species, with Iris virginica having the greatest mean sepal length at approximately 6.59 cm, followed by Iris versicolor at 5.94 cm, and Iris setosa with the smallest mean of 5.01 cm. This pattern represents a clear hierarchical relationship in sepal size among these species, with virginica sepals being longer than setosa and both being longer than versicolor. The error bars indicate relatively consistent variability within each species, though virginica shows slightly more variation in sepal length measurements. The clear separation between species means, with minimal overlap in confidence intervals, indicates that sepal length serves as a reliable characteristic for distinguishing among these iris species. These findings support the use of sepal length as a discriminating feature in botanical classification and species identification within the Iris genus.
