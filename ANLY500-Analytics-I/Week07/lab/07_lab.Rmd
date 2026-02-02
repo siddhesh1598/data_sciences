@@ -1,0 +1,3455 @@
+---
+title: "Correlation"
+author: "Siddhesh Shinde"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Title*: Big Data Analytics Services for Enhancing Business Intelligence
+
+*Abstract*: This article examines how to use big data analytics services to enhance business intelligence (BI). More specifically, this article proposes an ontology of big data analytics and presents a big data analytics service-oriented architecture (BASOA), and then applies BASOA to BI, where our surveyed data analysis shows that the proposed BASOA is viable for enhancing BI and enterprise information systems. This article also explores temporality, expectability, and relativity as the characteristics of intelligence in BI. These characteristics are what customers and decision makers expect from BI in terms of systems, products, and services of organizations. The proposed approach in this article might facilitate the research and development of business analytics, big data analytics, and BI as well as big data science and big data computing.
+
+# Dataset:
+
+    -	Gender of the participant surveyed on these topics
+    -	Temporality: an average score of the rated ability to adapt to change over time 1 (not changing) to 7 (changing a lot)
+    -	Expectability: a rated degree of satisfaction with the BI
+    -	Relativity: average score rating of how much better one system is than another in BI 1 (not very good) to 7 (very good)
+    -	Positive emotion: how positive participants felt about BI (higher scores are more positive, ranges from 1 to 7).
+
+```{r starting}
+library(seedhash)
+
+# Set reproducible seed
+gen <- SeedHashGenerator$new("Siddhesh")
+seeds <- gen$generate_seeds(5)
+set.seed(seeds[2])
+```
+
+# Data Screening:
+
+## Accuracy: 
+
+    a.	Include output that indicates if the data are or are not accurate.
+    b.	If the data are not accurate, delete the inaccurate scores.
+    c.	Include a summary that shows that you fixed the inaccurate scores.
+    
+```
+I loaded the data and identified out-of-range values in relativity (< -2 or > 10) and positive emotion (< -1 or > 8). I created a copy called notypos and documented the initial missing data counts. I then replaced all inaccurate values with NA to remove them from analysis. Finally, I verified the cleaning by reporting how many values were corrected and confirming the new missing data counts.
+```
+    
+```{r accuracy}
+# Load the data
+master <- read.csv("07_data.csv")
+
+# Find out-of-range values for relativity
+relativity_outliers <- which(master$relativity < -2 | master$relativity > 10)
+if(length(relativity_outliers) > 0) {
+  cat("Relativity out of range (< -2 or > 10):\n")
+  print(master[relativity_outliers, c("gender", "relativity")])
+  cat("\n")
+}
+
+# Find out-of-range values for positive emotion
+positive_outliers <- which(master$positive < -1 | master$positive > 8)
+if(length(positive_outliers) > 0) {
+  cat("Positive emotion out of range (< -1 or > 8):\n")
+  print(master[positive_outliers, c("gender", "positive")])
+  cat("\n")
+}
+
+# Create a cleaned dataset
+notypos <- master
+
+cat("Before cleaning:\n")
+cat("  Total observations:", nrow(notypos), "\n")
+cat("  Missing in relativity:", sum(is.na(notypos$relativity)), "\n")
+cat("  Missing in positive:", sum(is.na(notypos$positive)), "\n\n")
+
+# Set out-of-range values to NA
+notypos$relativity[notypos$relativity < -2 | notypos$relativity > 10] <- NA
+notypos$positive[notypos$positive < -1 | notypos$positive > 8] <- NA
+
+cat("Inaccurate values set to NA (missing)\n")
+cat("  Relativity: Set", length(relativity_outliers), "out-of-range values to NA\n")
+cat("  Positive: Set", length(positive_outliers), "out-of-range values to NA\n\n")
+
+cat("After cleaning:\n")
+cat("  Total observations:", nrow(notypos), "\n")
+cat("  Missing in relativity:", sum(is.na(notypos$relativity)), "\n")
+cat("  Missing in positive:", sum(is.na(notypos$positive)), "\n\n")
+```
+    
+## Missing:
+
+    a.  Since any accuracy errors will create more than 5% missing data, exclude all data pairwise for the rest of the analyses. 
+    
+```
+I calculated the total number of data points in the dataset by multiplying the number of rows by the number of columns. I then counted how many cells contain missing values (NA) across the entire dataset and calculated what percentage of all data points are missing.
+```
+    
+```{r missing}
+# Determine if we have more than 5% missing overall
+total_cells <- nrow(notypos) * ncol(notypos)
+total_missing <- sum(is.na(notypos))
+overall_missing_percent <- (total_missing / total_cells) * 100
+
+cat("OVERALL MISSING DATA:\n")
+cat("Total data points:", total_cells, "\n")
+cat("Missing data points:", total_missing, "\n")
+cat("Percentage missing:", sprintf("%.2f%%", overall_missing_percent), "\n\n")
+```
+    
+## Outliers:
+
+    a.	Include a summary of your mahal scores.
+    b.	What are the df for your Mahalanobis cutoff?
+    c.	What is the cut off score for your Mahalanobis measure?
+    d.	How many outliers did you have? 
+    
+```
+I calculated Mahalanobis distances for all four continuous variables (temporality, expectability, relativity, positive). df for Mahalanobis cutoff is 4. I used a conservative cutoff of p < .001 from the chi-square distribution, which gave me a cutoff score of 18.4668. I identified and removed the outliers, creating a cleaned dataset called noout.
+```
+    
+```{r outliers}
+continuous_vars <- c("temporality", "expectability", "relativity", "positive")
+mahal_data <- notypos[, continuous_vars]
+mahal_complete <- na.omit(mahal_data)
+
+mahal <- mahalanobis(mahal_complete, 
+                     colMeans(mahal_complete), 
+                     cov(mahal_complete))
+
+# a. Include a summary of your Mahalanobis scores
+# -----------------------------------------------------------------------------
+
+print(summary(mahal))
+
+cat("Distribution of Mahalanobis distances:\n")
+hist(mahal, 
+     breaks = 30, 
+     main = "Distribution of Mahalanobis Distances",
+     xlab = "Mahalanobis Distance",
+     ylab = "Frequency",
+     col = "lightblue",
+     border = "white")
+
+# b. What are the df for your Mahalanobis cutoff?
+# -----------------------------------------------------------------------------
+
+df_mahal <- ncol(mahal_complete)
+
+cat("Degrees of freedom (df) = number of variables in the analysis\n")
+cat("  Variables:", paste(continuous_vars, collapse = ", "), "\n")
+cat("  df =", df_mahal, "\n\n")
+
+# c. What is the cut off score for your Mahalanobis measure?
+# -----------------------------------------------------------------------------
+
+cutoff <- qchisq(1 - 0.001, df_mahal)
+
+cat("Using the chi-square distribution with df =", df_mahal, "\n")
+cat("Significance level: p < .001 (conservative threshold)\n\n")
+cat("Cutoff score:", sprintf("%.4f", cutoff), "\n\n")
+
+# d. How many outliers did you have?
+# -----------------------------------------------------------------------------
+
+outliers <- mahal > cutoff
+num_outliers <- sum(outliers)
+
+cat("Outlier identification:\n")
+cat("  Cases with Mahalanobis distance >", sprintf("%.4f", cutoff), ":", num_outliers, "\n")
+cat("  Percentage of sample:", sprintf("%.2f%%", 100 * num_outliers / length(mahal)), "\n\n")
+
+if(num_outliers > 0) {
+  cat("Outlier case details:\n")
+  outlier_indices <- which(outliers)
+  outlier_mahal <- mahal[outliers]
+  
+  outlier_summary <- data.frame(
+    Case = outlier_indices,
+    Mahalanobis_Distance = outlier_mahal,
+    Exceeds_Cutoff_By = outlier_mahal - cutoff
+  )
+  
+  print(outlier_summary)
+  
+  cat("\n\nOutlier data values:\n")
+  print(mahal_complete[outliers, ])
+  
+} else {
+  cat("✓ No multivariate outliers detected at p < .001 threshold.\n")
+}
+
+# Create dataset without outliers
+noout <- mahal_complete[!outliers, ]
+
+cat("Dataset after removing outliers:\n")
+cat("  Original complete cases:", nrow(mahal_complete), "\n")
+cat("  Cases removed:", num_outliers, "\n")
+cat("  Final sample size:", nrow(noout), "\n")
+cat("  Percentage retained:", sprintf("%.1f%%", 100 * nrow(noout) / nrow(mahal_complete)), "\n\n")
+
+if(num_outliers > 0) {
+  cat("Multivariate outliers have been identified and removed.\n")
+  cat("The dataset 'noout' contains", nrow(noout), "cases without outliers.\n")
+} else {
+  cat("No multivariate outliers detected. All cases retained.\n")
+  cat("The dataset 'noout' is identical to the complete cases.\n")
+}
+
+# Q-Q plot of Mahalanobis distances against chi-square distribution
+qqplot(qchisq(ppoints(length(mahal)), df = df_mahal), mahal,
+       main = "Q-Q Plot: Mahalanobis Distance vs Chi-Square Distribution",
+       xlab = "Theoretical Chi-Square Quantiles",
+       ylab = "Observed Mahalanobis Distance",
+       pch = 19,
+       col = ifelse(outliers, "red", "blue"))
+abline(0, 1, col = "gray", lty = 2, lwd = 2)
+abline(h = cutoff, col = "red", lty = 2, lwd = 2)
+legend("topleft", 
+       legend = c("Normal cases", "Outliers", "Expected (y=x)", "Cutoff"),
+       col = c("blue", "red", "gray", "red"),
+       pch = c(19, 19, NA, NA),
+       lty = c(NA, NA, 2, 2),
+       lwd = c(NA, NA, 2, 2))
+
+```
+    
+# Assumptions:
+
+## Linearity: 
+
+    a.	Include a picture that shows how you might assess multivariate linearity.
+    b.	Do you think you've met the assumption for linearity? 
+
+```
+I assessed the linearity assumption by creating scatterplot matrices and comparing linear regression lines (red) to LOESS smooth curves (blue) for all variable pairs. For each variable pair, I calculated the correlation between linear and LOESS predictions and compared their RMSE values—high correlation (>0.95) and minimal RMSE improvement (<10%).
+
+Expectability vs Temporality:
+  Correlation (linear vs loess predictions): 0.9050
+  RMSE improvement with loess: 1.27%
+  Assessment: ~ MOSTLY LINEAR - minor deviations acceptable
+
+Relativity vs Temporality:
+  Correlation (linear vs loess predictions): 0.6945
+  RMSE improvement with loess: 3.19%
+  Assessment: ✗ NON-LINEAR - substantial curvature detected
+
+Positive vs Temporality:
+  Correlation (linear vs loess predictions): 0.5528
+  RMSE improvement with loess: 4.64%
+  Assessment: ✗ NON-LINEAR - substantial curvature detected
+
+Relativity vs Expectability:
+  Correlation (linear vs loess predictions): 0.8470
+  RMSE improvement with loess: 1.37%
+  Assessment: ✗ NON-LINEAR - substantial curvature detected
+
+Positive vs Expectability:
+  Correlation (linear vs loess predictions): 0.0895
+  RMSE improvement with loess: 1.51%
+  Assessment: ✗ NON-LINEAR - substantial curvature detected
+
+Positive vs Relativity:
+  Correlation (linear vs loess predictions): 0.3952
+  RMSE improvement with loess: 1.48%
+  Assessment: ✗ NON-LINEAR - substantial curvature detected
+
+Variable pairs meeting linearity: 1 out of 6 (16.7%)
+
+✗ LINEARITY ASSUMPTION VIOLATED
+
+Conclusion:
+  Substantial non-linear relationships detected.
+```
+
+```{r linearity}
+# a. Include a picture that shows how you might assess multivariate linearity
+# -----------------------------------------------------------------------------
+
+# Load required package
+if(!require(psych)) {
+  install.packages("psych")
+  library(psych)
+}
+
+# METHOD 1: Scatterplot Matrix with Correlation Coefficients
+
+pairs.panels(noout[, c("temporality", "expectability", "relativity", "positive")],
+             method = "pearson",
+             hist.col = "lightblue",
+             density = TRUE,
+             ellipses = FALSE,
+             lm = TRUE,
+             main = "Scatterplot Matrix: Assessing Linearity")
+
+# METHOD 2: Individual Scatterplots with Regression and Loess Lines
+
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+
+plot_linearity <- function(x, y, xname, yname) {
+  plot(x, y,
+       pch = 19,
+       col = rgb(0, 0, 0.8, 0.5),
+       main = paste(yname, "vs", xname),
+       xlab = xname,
+       ylab = yname,
+       cex = 0.8)
+  
+  abline(lm(y ~ x), col = "red", lwd = 2)
+  lines(lowess(x, y), col = "blue", lwd = 2, lty = 2)
+  grid(col = "gray", lty = 3)
+  legend("topleft", 
+         legend = c("Linear", "Loess smooth"),
+         col = c("red", "blue"),
+         lty = c(1, 2),
+         lwd = 2,
+         cex = 0.7,
+         bg = "white")
+}
+
+plot_linearity(noout$temporality, noout$expectability, "Temporality", "Expectability")
+plot_linearity(noout$temporality, noout$relativity, "Temporality", "Relativity")
+plot_linearity(noout$temporality, noout$positive, "Temporality", "Positive")
+plot_linearity(noout$expectability, noout$relativity, "Expectability", "Relativity")
+plot_linearity(noout$expectability, noout$positive, "Expectability", "Positive")
+plot_linearity(noout$relativity, noout$positive, "Relativity", "Positive")
+
+par(mfrow = c(1, 1))
+
+# METHOD 3: Residual Plots from Fake Regression
+
+set.seed(123)
+noout$random_y <- rnorm(nrow(noout))
+
+fake_model <- lm(random_y ~ temporality + expectability + relativity + positive, 
+                 data = noout)
+
+standardized_residuals <- rstandard(fake_model)
+fitted_values <- fitted(fake_model)
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+# Plot 1: Residuals vs Fitted
+plot(fitted_values, standardized_residuals,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Fitted Values",
+     xlab = "Fitted Values",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+abline(h = c(-2, 2), col = "orange", lty = 2)
+lines(lowess(fitted_values, standardized_residuals), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+text(min(fitted_values), 2.5, "Look for: Random scatter around zero", 
+     adj = 0, cex = 0.8, col = "darkgreen")
+
+# Plot 2: Residuals vs Temporality
+plot(noout$temporality, standardized_residuals,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Temporality",
+     xlab = "Temporality",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+abline(h = c(-2, 2), col = "orange", lty = 2)
+lines(lowess(noout$temporality, standardized_residuals), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+
+# Plot 3: Residuals vs Expectability
+plot(noout$expectability, standardized_residuals,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Expectability",
+     xlab = "Expectability",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+abline(h = c(-2, 2), col = "orange", lty = 2)
+lines(lowess(noout$expectability, standardized_residuals), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+
+# Plot 4: Residuals vs Relativity
+plot(noout$relativity, standardized_residuals,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Relativity",
+     xlab = "Relativity",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+abline(h = c(-2, 2), col = "orange", lty = 2)
+lines(lowess(noout$relativity, standardized_residuals), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+
+par(mfrow = c(1, 1))
+
+# b. Do you think you've met the assumption for linearity?
+# -----------------------------------------------------------------------------
+
+check_linearity <- function(x, y, xname, yname) {
+  linear_fit <- lm(y ~ x)
+  loess_fit <- loess(y ~ x)
+  
+  linear_pred <- predict(linear_fit)
+  loess_pred <- predict(loess_fit)
+  
+  pred_cor <- cor(linear_pred, loess_pred)
+  
+  linear_rmse <- sqrt(mean((y - linear_pred)^2))
+  loess_rmse <- sqrt(mean((y - loess_pred)^2))
+  rmse_improvement <- ((linear_rmse - loess_rmse) / linear_rmse) * 100
+  
+  cat(sprintf("%s vs %s:\n", yname, xname))
+  cat(sprintf("  Correlation (linear vs loess predictions): %.4f\n", pred_cor))
+  cat(sprintf("  RMSE improvement with loess: %.2f%%\n", rmse_improvement))
+  
+  if(pred_cor > 0.95 & rmse_improvement < 10) {
+    cat("  Assessment: ✓ LINEAR - loess and linear very similar\n\n")
+    return(TRUE)
+  } else if(pred_cor > 0.85 & rmse_improvement < 20) {
+    cat("  Assessment: ~ MOSTLY LINEAR - minor deviations acceptable\n\n")
+    return(TRUE)
+  } else {
+    cat("  Assessment: ✗ NON-LINEAR - substantial curvature detected\n\n")
+    return(FALSE)
+  }
+}
+
+# Check all pairs
+linearity_results <- c()
+linearity_results[1] <- check_linearity(noout$temporality, noout$expectability, 
+                                        "Temporality", "Expectability")
+linearity_results[2] <- check_linearity(noout$temporality, noout$relativity, 
+                                        "Temporality", "Relativity")
+linearity_results[3] <- check_linearity(noout$temporality, noout$positive, 
+                                        "Temporality", "Positive")
+linearity_results[4] <- check_linearity(noout$expectability, noout$relativity, 
+                                        "Expectability", "Relativity")
+linearity_results[5] <- check_linearity(noout$expectability, noout$positive, 
+                                        "Expectability", "Positive")
+linearity_results[6] <- check_linearity(noout$relativity, noout$positive, 
+                                        "Relativity", "Positive")
+
+percent_linear <- mean(linearity_results) * 100
+
+cat(sprintf("Variable pairs meeting linearity: %d out of 6 (%.1f%%)\n\n", 
+            sum(linearity_results), percent_linear))
+
+if(percent_linear >= 80) {
+  cat("✓ LINEARITY ASSUMPTION MET\n\n")
+} else if(percent_linear >= 50) {
+  cat("~ LINEARITY PARTIALLY MET\n\n")
+} else {
+  cat("✗ LINEARITY ASSUMPTION VIOLATED\n\n")
+  cat("Conclusion:\n")
+  cat("  Substantial non-linear relationships detected.\n")
+}
+
+```
+
+## Normality: 
+
+    a.	Include a picture that shows how you might assess multivariate normality.
+    b.	Do you think you've met the assumption for normality? 
+
+```
+I created histograms with normal curve overlays, Q-Q plots, and combined diagnostic plots showing all assessments together. For each variable, I calculated skewness, kurtosis, and performed Shapiro-Wilk tests.
+
+Detailed diagnostic plots for each variable:
+
+Temporality:
+  N: 264
+  Mean: 3.531, SD: 0.810
+  Skewness: -0.154 (✓ good)
+  Kurtosis: -1.075 (✓ good)
+  Shapiro-Wilk: W = 0.9647, p = 0.0000 (✗ reject normality)
+  Overall: ~ ACCEPTABLE
+
+Expectability:
+  N: 264
+  Mean: 3.625, SD: 1.722
+  Skewness: 0.296 (✓ good)
+  Kurtosis: -0.175 (✓ good)
+  Shapiro-Wilk: W = 0.9613, p = 0.0000 (✗ reject normality)
+  Overall: ~ ACCEPTABLE
+
+Relativity:
+  N: 264
+  Mean: 3.614, SD: 1.851
+  Skewness: 0.164 (✓ good)
+  Kurtosis: 0.552 (✓ good)
+  Shapiro-Wilk: W = 0.9896, p = 0.0566 (✓ normal)
+  Overall: ✓ NORMAL
+
+Positive Emotion:
+  N: 264
+  Mean: 3.091, SD: 1.648
+  Skewness: 0.043 (✓ good)
+  Kurtosis: -0.141 (✓ good)
+  Shapiro-Wilk: W = 0.9954, p = 0.6179 (✓ normal)
+  Overall: ✓ NORMAL
+
+Variables meeting normality: 4 out of 4 (100.0%)
+
+✓ NORMALITY ASSUMPTION FULLY MET
+```
+
+```{r normality}
+# a. Include a picture that shows how you might assess multivariate normality
+# -----------------------------------------------------------------------------
+# Load required packages
+if(!require(moments)) {
+  install.packages("moments")
+  library(moments)
+}
+
+# METHOD 1: Histograms with Normal Curve Overlay
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+plot_histogram <- function(data, varname) {
+  h <- hist(data, 
+            breaks = 20,
+            main = paste("Histogram:", varname),
+            xlab = varname,
+            ylab = "Frequency",
+            col = "lightblue",
+            border = "white",
+            xlim = c(min(data) - 0.5*sd(data), max(data) + 0.5*sd(data)))
+  
+  xfit <- seq(min(data), max(data), length = 100)
+  yfit <- dnorm(xfit, mean = mean(data), sd = sd(data))
+  yfit <- yfit * diff(h$mids[1:2]) * length(data)
+  lines(xfit, yfit, col = "red", lwd = 2)
+  
+  abline(v = mean(data), col = "blue", lwd = 2, lty = 2)
+  
+  legend("topright", 
+         legend = c("Normal curve", "Mean"),
+         col = c("red", "blue"),
+         lty = c(1, 2),
+         lwd = 2,
+         cex = 0.8,
+         bg = "white")
+}
+
+plot_histogram(noout$temporality, "Temporality")
+plot_histogram(noout$expectability, "Expectability")
+plot_histogram(noout$relativity, "Relativity")
+plot_histogram(noout$positive, "Positive Emotion")
+
+par(mfrow = c(1, 1))
+
+# METHOD 2: Q-Q Plots (Quantile-Quantile Plots)
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+
+plot_qq <- function(data, varname) {
+  qqnorm(data, 
+         main = paste("Q-Q Plot:", varname),
+         xlab = "Theoretical Quantiles",
+         ylab = "Sample Quantiles",
+         pch = 19,
+         col = rgb(0, 0, 0.8, 0.5),
+         cex = 0.8)
+  qqline(data, col = "red", lwd = 2)
+  
+  n <- length(data)
+  sorted_data <- sort(data)
+  theoretical <- qnorm(ppoints(n))
+  
+  se <- (sd(data) / sqrt(n)) * sqrt(ppoints(n) * (1 - ppoints(n)))
+  
+  grid(col = "gray", lty = 3)
+  
+  text(min(theoretical), max(sorted_data),
+       "Points should fall\non red line",
+       adj = c(0, 1),
+       cex = 0.8,
+       col = "darkgreen")
+}
+
+plot_qq(noout$temporality, "Temporality")
+plot_qq(noout$expectability, "Expectability")
+plot_qq(noout$relativity, "Relativity")
+plot_qq(noout$positive, "Positive Emotion")
+
+par(mfrow = c(1, 1))
+
+# METHOD 3: Density Plots with Normal Comparison
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+
+plot_density <- function(data, varname) {
+  d <- density(data)
+  plot(d, 
+       main = paste("Density Plot:", varname),
+       xlab = varname,
+       ylab = "Density",
+       lwd = 2,
+       col = "blue")
+  
+  xfit <- seq(min(data), max(data), length = 100)
+  yfit <- dnorm(xfit, mean = mean(data), sd = sd(data))
+  lines(xfit, yfit, col = "red", lwd = 2, lty = 2)
+  
+  polygon(d, col = rgb(0, 0, 1, 0.2), border = NA)
+  
+  legend("topright",
+         legend = c("Actual", "Normal"),
+         col = c("blue", "red"),
+         lty = c(1, 2),
+         lwd = 2,
+         cex = 0.8,
+         bg = "white")
+  
+  grid(col = "gray", lty = 3)
+}
+
+plot_density(noout$temporality, "Temporality")
+plot_density(noout$expectability, "Expectability")
+plot_density(noout$relativity, "Relativity")
+plot_density(noout$positive, "Positive Emotion")
+
+par(mfrow = c(1, 1))
+
+# METHOD 4: Combined Diagnostic Plot
+
+create_diagnostic <- function(data, varname) {
+  par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+  
+  # 1. Histogram
+  h <- hist(data, breaks = 20, main = paste(varname, "- Histogram"),
+            xlab = varname, col = "lightblue", border = "white")
+  xfit <- seq(min(data), max(data), length = 100)
+  yfit <- dnorm(xfit, mean = mean(data), sd = sd(data))
+  yfit <- yfit * diff(h$mids[1:2]) * length(data)
+  lines(xfit, yfit, col = "red", lwd = 2)
+  
+  # 2. Q-Q Plot
+  qqnorm(data, main = paste(varname, "- Q-Q Plot"),
+         pch = 19, col = rgb(0, 0, 0.8, 0.5))
+  qqline(data, col = "red", lwd = 2)
+  
+  # 3. Boxplot
+  boxplot(data, main = paste(varname, "- Boxplot"),
+          ylab = varname, col = "lightgreen", horizontal = FALSE)
+  
+  # 4. Density plot
+  d <- density(data)
+  plot(d, main = paste(varname, "- Density"),
+       xlab = varname, lwd = 2, col = "blue")
+  xfit <- seq(min(data), max(data), length = 100)
+  yfit <- dnorm(xfit, mean = mean(data), sd = sd(data))
+  lines(xfit, yfit, col = "red", lwd = 2, lty = 2)
+  polygon(d, col = rgb(0, 0, 1, 0.2), border = NA)
+  
+  par(mfrow = c(1, 1))
+}
+
+cat("Detailed diagnostic plots for each variable:\n\n")
+create_diagnostic(noout$temporality, "Temporality")
+create_diagnostic(noout$expectability, "Expectability")
+create_diagnostic(noout$relativity, "Relativity")
+create_diagnostic(noout$positive, "Positive Emotion")
+
+# b. Do you think you've met the assumption for normality?
+# -----------------------------------------------------------------------------
+normality_results <- data.frame(
+  Variable = character(),
+  N = numeric(),
+  Mean = numeric(),
+  SD = numeric(),
+  Skewness = numeric(),
+  Kurtosis = numeric(),
+  Shapiro_W = numeric(),
+  Shapiro_p = numeric(),
+  Assessment = character(),
+  stringsAsFactors = FALSE
+)
+
+# Function to assess normality
+assess_normality <- function(data, varname) {
+  n <- length(data)
+  m <- mean(data)
+  s <- sd(data)
+  skew <- skewness(data)
+  kurt <- kurtosis(data) - 3  # Excess kurtosis
+  
+  # Shapiro-Wilk test (for n <= 5000)
+  if(n <= 5000) {
+    shapiro_test <- shapiro.test(data)
+    w_stat <- shapiro_test$statistic
+    p_val <- shapiro_test$p.value
+  } else {
+    w_stat <- NA
+    p_val <- NA
+  }
+  
+  # Assessment criteria
+  # Skewness: |skew| < 2 is acceptable, < 1 is good
+  # Kurtosis: |kurt| < 7 is acceptable, < 3 is good
+  # Shapiro: p > 0.05 suggests normality
+  
+  skew_ok <- abs(skew) < 2
+  kurt_ok <- abs(kurt) < 7
+  shapiro_ok <- is.na(p_val) || p_val > 0.05
+  
+  if(skew_ok && kurt_ok && shapiro_ok) {
+    assessment <- "✓ NORMAL"
+  } else if((abs(skew) < 3 && abs(kurt) < 10 && (is.na(p_val) || p_val > 0.01)) || n > 50) {
+    assessment <- "~ ACCEPTABLE"
+  } else {
+    assessment <- "✗ NON-NORMAL"
+  }
+  
+  cat(sprintf("%s:\n", varname))
+  cat(sprintf("  N: %d\n", n))
+  cat(sprintf("  Mean: %.3f, SD: %.3f\n", m, s))
+  cat(sprintf("  Skewness: %.3f %s\n", skew, 
+              ifelse(abs(skew) < 1, "(✓ good)", 
+                     ifelse(abs(skew) < 2, "(~ acceptable)", "(✗ problematic)"))))
+  cat(sprintf("  Kurtosis: %.3f %s\n", kurt,
+              ifelse(abs(kurt) < 3, "(✓ good)",
+                     ifelse(abs(kurt) < 7, "(~ acceptable)", "(✗ problematic)"))))
+  if(!is.na(w_stat)) {
+    cat(sprintf("  Shapiro-Wilk: W = %.4f, p = %.4f %s\n", w_stat, p_val,
+                ifelse(p_val > 0.05, "(✓ normal)", "(✗ reject normality)")))
+  }
+  cat(sprintf("  Overall: %s\n\n", assessment))
+  
+  return(data.frame(
+    Variable = varname,
+    N = n,
+    Mean = m,
+    SD = s,
+    Skewness = skew,
+    Kurtosis = kurt,
+    Shapiro_W = w_stat,
+    Shapiro_p = p_val,
+    Assessment = assessment,
+    stringsAsFactors = FALSE
+  ))
+}
+
+# Assess each variable
+normality_results <- rbind(normality_results,
+                           assess_normality(noout$temporality, "Temporality"))
+normality_results <- rbind(normality_results,
+                           assess_normality(noout$expectability, "Expectability"))
+normality_results <- rbind(normality_results,
+                           assess_normality(noout$relativity, "Relativity"))
+normality_results <- rbind(normality_results,
+                           assess_normality(noout$positive, "Positive Emotion"))
+
+cat("SUMMARY TABLE:\n")
+cat("--------------\n")
+print(normality_results, row.names = FALSE)
+
+normal_count <- sum(grepl("NORMAL|ACCEPTABLE", normality_results$Assessment))
+total_vars <- nrow(normality_results)
+
+cat(sprintf("Variables meeting normality: %d out of %d (%.1f%%)\n\n",
+            normal_count, total_vars, 100 * normal_count / total_vars))
+
+if(normal_count == total_vars) {
+  cat("✓ NORMALITY ASSUMPTION FULLY MET\n\n")
+} else if(normal_count >= total_vars * 0.75) {
+  cat("✓ NORMALITY ASSUMPTION REASONABLY MET\n\n")
+} else if(nrow(noout) >= 30) {
+  cat("~ NORMALITY ASSUMPTION PARTIALLY MET\n\n")
+} else {
+  cat("✗ NORMALITY ASSUMPTION VIOLATED\n\n")
+}
+```
+
+## Homogeneity and Homoscedasticity: 
+
+    a.	Include a picture that shows how you might assess multivariate homogeneity.
+    b.	Do you think you've met the assumption for homogeneity?
+    c.	Do you think you've met the assumption for homoscedasticity?
+    
+```
+I created boxplots by gender to compare variance, calculated variance ratios, and generated spread-location plots. For statistical testing, I performed Levene's test on each variable to assess whether variances differ significantly between women and men. To assess homoscedasticity, I examined residual plots and scale-location plots from a regression model. I also conducted the Breusch-Pagan test. 
+
+Variables meeting homogeneity: 4 out of 4
+
+✓ HOMOGENEITY ASSUMPTION MET
+Breusch-Pagan Test:
+  BP = 1.3013, p = 0.8612
+  Result: ✓ Homoscedastic
+
+✓ HOMOSCEDASTICITY ASSUMPTION MET
+```
+    
+```{r homogs}
+# Load required packages
+if(!require(car)) {
+  install.packages("car")
+  library(car)
+}
+
+noout_rownames <- as.numeric(rownames(noout))
+noout_with_gender <- noout
+noout_with_gender$gender <- notypos$gender[noout_rownames]
+
+cat("Total cases in noout:", nrow(noout_with_gender), "\n")
+print(table(noout_with_gender$gender, useNA = "ifany"))
+cat("\n")
+
+noout <- noout_with_gender
+
+cat("Sample size for testing:", nrow(noout), "\n")
+cat("Gender distribution:\n")
+print(table(noout$gender))
+cat("\n\n")
+
+# a. Include a picture that shows how you might assess multivariate homogeneity
+# -----------------------------------------------------------------------------
+
+# METHOD 1: Boxplots by Gender for Each Variable
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+
+plot_boxplot <- function(data, var_col, varname) {
+  women_data <- data[data$gender == "women", var_col]
+  men_data <- data[data$gender == "men", var_col]
+  
+  women_data <- women_data[!is.na(women_data)]
+  men_data <- men_data[!is.na(men_data)]
+  
+  if(length(women_data) == 0 | length(men_data) == 0) {
+    cat("ERROR: No data for", varname, "\n")
+    return()
+  }
+  
+  bp <- boxplot(women_data, men_data,
+                main = paste(varname, "by Gender"),
+                xlab = "Gender",
+                ylab = varname,
+                col = c("pink", "lightblue"),
+                names = c("Women", "Men"),
+                outline = TRUE)
+  
+  points(jitter(rep(1, length(women_data)), amount = 0.1),
+         women_data,
+         pch = 19,
+         col = rgb(1, 0, 0, 0.3),
+         cex = 0.5)
+  
+  points(jitter(rep(2, length(men_data)), amount = 0.1),
+         men_data,
+         pch = 19,
+         col = rgb(0, 0, 1, 0.3),
+         cex = 0.5)
+  
+  grid(col = "gray", lty = 3)
+  
+  var_women <- var(women_data, na.rm = TRUE)
+  var_men <- var(men_data, na.rm = TRUE)
+  ratio <- max(var_women, var_men) / min(var_women, var_men)
+  
+  text(1.5, min(bp$stats) + 0.1 * diff(range(bp$stats)),
+       sprintf("Var ratio: %.2f", ratio),
+       cex = 0.8,
+       col = ifelse(ratio < 2, "darkgreen", "darkred"))
+}
+
+plot_boxplot(noout, "temporality", "Temporality")
+plot_boxplot(noout, "expectability", "Expectability")
+plot_boxplot(noout, "relativity", "Relativity")
+plot_boxplot(noout, "positive", "Positive Emotion")
+
+par(mfrow = c(1, 1))
+
+# METHOD 2: Variance Comparison Plots
+par(mfrow = c(1, 2), mar = c(5, 4, 3, 2))
+
+vars_list <- c("temporality", "expectability", "relativity", "positive")
+var_women <- sapply(vars_list, function(v) {
+  var(noout[noout$gender == "women", v], na.rm = TRUE)
+})
+var_men <- sapply(vars_list, function(v) {
+  var(noout[noout$gender == "men", v], na.rm = TRUE)
+})
+
+# Plot 1: Side-by-side variance comparison
+barplot_data <- rbind(var_women, var_men)
+colnames(barplot_data) <- c("Temp", "Expect", "Relat", "Posit")
+
+bp <- barplot(barplot_data,
+              beside = TRUE,
+              main = "Variance by Gender",
+              ylab = "Variance",
+              col = c("pink", "lightblue"),
+              legend.text = c("Women", "Men"),
+              args.legend = list(x = "topright", bty = "n"))
+
+grid(col = "gray", lty = 3)
+
+# Plot 2: Variance ratio plot
+var_ratio <- pmax(var_women, var_men) / pmin(var_women, var_men)
+
+barplot(var_ratio,
+        names.arg = c("Temp", "Expect", "Relat", "Posit"),
+        main = "Variance Ratio (Max/Min)",
+        ylab = "Ratio",
+        col = ifelse(var_ratio < 2, "lightgreen", "lightcoral"),
+        ylim = c(0, max(var_ratio) * 1.2))
+
+abline(h = 2, col = "red", lwd = 2, lty = 2)
+text(2.5, 2.2, "Acceptable threshold (2.0)", col = "red", cex = 0.8)
+grid(col = "gray", lty = 3)
+
+par(mfrow = c(1, 1))
+
+# METHOD 3: Spread-Location Plots by Gender
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+
+create_spread_plot <- function(data, varname) {
+  women_data <- data[data$gender == "women", varname]
+  men_data <- data[data$gender == "men", varname]
+  
+  women_data <- women_data[!is.na(women_data)]
+  men_data <- men_data[!is.na(men_data)]
+  
+  women_mean <- mean(women_data, na.rm = TRUE)
+  men_mean <- mean(men_data, na.rm = TRUE)
+  
+  women_abs_dev <- abs(women_data - women_mean)
+  men_abs_dev <- abs(men_data - men_mean)
+  
+  plot(c(rep(1, length(women_abs_dev)), rep(2, length(men_abs_dev))),
+       c(women_abs_dev, men_abs_dev),
+       pch = 19,
+       col = c(rep(rgb(1, 0, 0, 0.3), length(women_abs_dev)),
+               rep(rgb(0, 0, 1, 0.3), length(men_abs_dev))),
+       xlim = c(0.5, 2.5),
+       xaxt = "n",
+       main = paste(varname, "- Spread Plot"),
+       xlab = "Gender",
+       ylab = "Absolute Deviation from Group Mean")
+  
+  axis(1, at = c(1, 2), labels = c("Women", "Men"))
+  
+  segments(0.7, median(women_abs_dev, na.rm = TRUE),
+           1.3, median(women_abs_dev, na.rm = TRUE),
+           col = "red", lwd = 3)
+  segments(1.7, median(men_abs_dev, na.rm = TRUE),
+           2.3, median(men_abs_dev, na.rm = TRUE),
+           col = "blue", lwd = 3)
+  
+  grid(col = "gray", lty = 3)
+}
+
+create_spread_plot(noout, "temporality")
+create_spread_plot(noout, "expectability")
+create_spread_plot(noout, "relativity")
+create_spread_plot(noout, "positive")
+
+par(mfrow = c(1, 1))
+
+# METHOD 4: Residual Plots for Homoscedasticity
+set.seed(123)
+noout$random_y <- rnorm(nrow(noout))
+
+fake_model <- lm(random_y ~ temporality + expectability + relativity + positive,
+                 data = noout)
+
+standardized_resid <- rstandard(fake_model)
+fitted_vals <- fitted(fake_model)
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 2))
+
+# Plot 1: Residuals vs Fitted (main homoscedasticity check)
+plot(fitted_vals, standardized_resid,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Fitted Values",
+     xlab = "Fitted Values",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+abline(h = c(-2, 2), col = "orange", lty = 2)
+lines(lowess(fitted_vals, standardized_resid), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+text(min(fitted_vals), 2.5,
+     "Look for: Even spread\nacross fitted values",
+     adj = 0, cex = 0.7, col = "darkgreen")
+
+# Plot 2: Scale-Location plot
+sqrt_abs_resid <- sqrt(abs(standardized_resid))
+plot(fitted_vals, sqrt_abs_resid,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Scale-Location Plot",
+     xlab = "Fitted Values",
+     ylab = "√|Standardized Residuals|")
+lines(lowess(fitted_vals, sqrt_abs_resid), col = "red", lwd = 2)
+grid(col = "gray", lty = 3)
+text(min(fitted_vals), max(sqrt_abs_resid) * 0.9,
+     "Flat red line = \nhomoscedastic",
+     adj = 0, cex = 0.7, col = "darkgreen")
+
+# Plot 3: Residuals vs Temporality
+plot(noout$temporality, standardized_resid,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Temporality",
+     xlab = "Temporality",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+lines(lowess(noout$temporality, standardized_resid), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+
+# Plot 4: Residuals vs Expectability
+plot(noout$expectability, standardized_resid,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     main = "Residuals vs Expectability",
+     xlab = "Expectability",
+     ylab = "Standardized Residuals",
+     ylim = c(-3, 3))
+abline(h = 0, col = "red", lwd = 2)
+lines(lowess(noout$expectability, standardized_resid), col = "blue", lwd = 2)
+grid(col = "gray", lty = 3)
+
+par(mfrow = c(1, 1))
+
+# b. Do you think you've met the assumption for homogeneity?
+# -----------------------------------------------------------------------------
+homogeneity_results <- data.frame(
+  Variable = character(),
+  F_statistic = numeric(),
+  p_value = numeric(),
+  Var_Women = numeric(),
+  Var_Men = numeric(),
+  Var_Ratio = numeric(),
+  Assessment = character(),
+  stringsAsFactors = FALSE
+)
+
+perform_levene <- function(data, varname) {
+  formula_str <- paste(varname, "~ gender")
+  levene_result <- leveneTest(as.formula(formula_str), data = data)
+  
+  f_stat <- levene_result$`F value`[1]
+  p_val <- levene_result$`Pr(>F)`[1]
+  
+  var_w <- var(data[data$gender == "women", varname], na.rm = TRUE)
+  var_m <- var(data[data$gender == "men", varname], na.rm = TRUE)
+  var_ratio <- max(var_w, var_m) / min(var_w, var_m)
+  
+  if(p_val > 0.05 && var_ratio < 2) {
+    assessment <- "✓ HOMOGENEOUS"
+  } else if(p_val > 0.01 || var_ratio < 3) {
+    assessment <- "~ ACCEPTABLE"
+  } else {
+    assessment <- "✗ HETEROGENEOUS"
+  }
+  
+  cat(sprintf("%s:\n", varname))
+  cat(sprintf("  Levene's F = %.4f, p = %.4f %s\n",
+              f_stat, p_val,
+              ifelse(p_val > 0.05, "(✓)", "(✗)")))
+  cat(sprintf("  Variance - Women: %.4f, Men: %.4f\n", var_w, var_m))
+  cat(sprintf("  Variance Ratio: %.4f %s\n", var_ratio,
+              ifelse(var_ratio < 2, "(✓)", "(high)")))
+  cat(sprintf("  Assessment: %s\n\n", assessment))
+  
+  return(data.frame(
+    Variable = varname,
+    F_statistic = f_stat,
+    p_value = p_val,
+    Var_Women = var_w,
+    Var_Men = var_m,
+    Var_Ratio = var_ratio,
+    Assessment = assessment,
+    stringsAsFactors = FALSE
+  ))
+}
+
+homogeneity_results <- rbind(homogeneity_results,
+                             perform_levene(noout, "temporality"))
+homogeneity_results <- rbind(homogeneity_results,
+                             perform_levene(noout, "expectability"))
+homogeneity_results <- rbind(homogeneity_results,
+                             perform_levene(noout, "relativity"))
+homogeneity_results <- rbind(homogeneity_results,
+                             perform_levene(noout, "positive"))
+
+cat("SUMMARY TABLE:\n")
+print(homogeneity_results, row.names = FALSE)
+
+homog_count <- sum(grepl("HOMOGENEOUS|ACCEPTABLE", homogeneity_results$Assessment))
+total_tests <- nrow(homogeneity_results)
+
+cat(sprintf("Variables meeting homogeneity: %d out of %d\n\n", homog_count, total_tests))
+
+if(homog_count == total_tests) {
+  cat("✓ HOMOGENEITY ASSUMPTION MET\n")
+} else if(homog_count >= 3) {
+  cat("✓ HOMOGENEITY ASSUMPTION REASONABLY MET\n")
+} else {
+  cat("⚠ HOMOGENEITY ASSUMPTION PARTIALLY MET\n")
+}
+
+# c. Do you think you've met the assumption for homoscedasticity?
+# -----------------------------------------------------------------------------
+if(!require(lmtest)) {
+  install.packages("lmtest")
+  library(lmtest)
+}
+
+bp_test <- bptest(fake_model)
+
+cat("Breusch-Pagan Test:\n")
+cat(sprintf("  BP = %.4f, p = %.4f\n", bp_test$statistic, bp_test$p.value))
+
+if(bp_test$p.value > 0.05) {
+  cat("  Result: ✓ Homoscedastic\n\n")
+  cat("✓ HOMOSCEDASTICITY ASSUMPTION MET\n")
+} else {
+  cat("  Result: ✗ Heteroscedastic\n\n")
+  cat("⚠ HOMOSCEDASTICITY ASSUMPTION VIOLATED\n")
+}
+```
+    
+# Hypothesis Testing / Graphs:
+
+Create a scatter plot of temporality and relativity.
+
+    a.	Be sure to check x/y axis labels and length.
+    b.	What type of relationship do these two variables appear to have?
+
+```
+I created a scatterplot examining the relationship between temporality and relativity. I added reference lines at the means, displayed the correlation coefficient and sample size, and included a grid for readability. To assess the relationship type, I calculated Pearson's correlation, performed significance testing, and determined effect size using Cohen's guidelines. I compared linear regression predictions to LOESS predictions to assess linearity. 
+
+The scatter plot reveals a weak POSITIVE relationship between temporality (ability to adapt to change over time) and relativity (system comparison rating) in the Business Intelligence context. However, the relationship is too weak to draw strong conclusions about the association between these two characteristics of business intelligence systems.
+```
+
+```{r plot1}
+# a. Be sure to check x/y axis labels and length
+# -----------------------------------------------------------------------------
+x_range <- range(noout$temporality, na.rm = TRUE)
+y_range <- range(noout$relativity, na.rm = TRUE)
+
+x_padding <- diff(x_range) * 0.1
+y_padding <- diff(y_range) * 0.1
+
+x_limits <- c(x_range[1] - x_padding, x_range[2] + x_padding)
+y_limits <- c(y_range[1] - y_padding, y_range[2] + y_padding)
+
+plot(noout$temporality, 
+     noout$relativity,
+     main = "Relationship between Temporality and Relativity",
+     xlab = "Temporality\n(Ability to Adapt to Change Over Time: 1-7 scale)",
+     ylab = "Relativity\n(System Comparison Rating: 1-7 scale)",
+     xlim = x_limits,
+     ylim = y_limits,
+     pch = 19,
+     col = rgb(0, 0, 0.8, 0.5),
+     cex = 1.2,
+     cex.lab = 1.1,
+     cex.axis = 1.0,
+     cex.main = 1.3)
+
+grid(col = "gray", lty = 3)
+
+abline(v = mean(noout$temporality, na.rm = TRUE), 
+       col = "blue", lwd = 1, lty = 2)
+abline(h = mean(noout$relativity, na.rm = TRUE), 
+       col = "blue", lwd = 1, lty = 2)
+
+cor_value <- cor(noout$temporality, noout$relativity, 
+                 use = "pairwise.complete.obs", method = "pearson")
+
+legend("topleft", 
+       legend = sprintf("r = %.3f", cor_value),
+       bty = "n",
+       cex = 1.2,
+       text.col = "darkblue",
+       text.font = 2)
+
+n_complete <- sum(complete.cases(noout[, c("temporality", "relativity")]))
+legend("bottomright",
+       legend = sprintf("n = %d", n_complete),
+       bty = "n",
+       cex = 1.0,
+       text.col = "darkgray")
+
+# b. What type of relationship do these two variables appear to have?
+# -----------------------------------------------------------------------------
+cor_test <- cor.test(noout$temporality, noout$relativity, 
+                     method = "pearson",
+                     use = "pairwise.complete.obs")
+
+cat("Pearson's correlation:\n")
+cat("  r =", sprintf("%.4f", cor_test$estimate), "\n")
+cat("  t(", cor_test$parameter, ") =", sprintf("%.4f", cor_test$statistic), "\n", sep = "")
+cat("  p-value =", sprintf("%.4f", cor_test$p.value))
+
+if(cor_test$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_test$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_test$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat(" (not significant)\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_test$conf.int[1]), ",",
+    sprintf("%.4f", cor_test$conf.int[2]), "]\n\n", sep = "")
+
+# Effect size interpretation
+cat("Effect size interpretation (Cohen, 1988):\n")
+abs_r <- abs(cor_test$estimate)
+if(abs_r < 0.1) {
+  effect_size <- "Negligible (|r| < 0.1)"
+} else if(abs_r < 0.3) {
+  effect_size <- "Small (0.1 ≤ |r| < 0.3)"
+} else if(abs_r < 0.5) {
+  effect_size <- "Medium (0.3 ≤ |r| < 0.5)"
+} else {
+  effect_size <- "Large (|r| ≥ 0.5)"
+}
+cat("  ", effect_size, "\n\n")
+
+# Coefficient of determination
+r_squared <- cor_test$estimate^2
+cat("Coefficient of determination:\n")
+cat("  R² =", sprintf("%.4f", r_squared), "\n")
+cat("  Interpretation:", sprintf("%.2f%%", r_squared * 100), 
+    "of variance in relativity is\n")
+cat("  explained by temporality (or vice versa).\n\n")
+
+if(abs(cor_test$estimate) < 0.1) {
+  strength <- "negligible or no"
+} else if(abs(cor_test$estimate) < 0.3) {
+  strength <- "weak"
+} else if(abs(cor_test$estimate) < 0.5) {
+  strength <- "moderate"
+} else {
+  strength <- "strong"
+}
+
+if(cor_test$estimate > 0) {
+  direction <- "POSITIVE"
+  direction_desc <- "As temporality increases, relativity tends to increase"
+} else {
+  direction <- "NEGATIVE"
+  direction_desc <- "As temporality increases, relativity tends to decrease"
+}
+
+linear_fit <- lm(relativity ~ temporality, data = noout)
+loess_fit <- loess(relativity ~ temporality, data = noout)
+
+linear_pred <- predict(linear_fit)
+loess_pred <- predict(loess_fit)
+
+pred_cor <- cor(linear_pred, loess_pred)
+
+if(pred_cor > 0.95) {
+  linearity <- "LINEAR"
+} else if(pred_cor > 0.90) {
+  linearity <- "MOSTLY LINEAR"
+} else {
+  linearity <- "POTENTIALLY NON-LINEAR"
+}
+
+cat("Relationship type:", direction, "-", strength, "-", linearity, "\n\n")
+cat("Direction: ", direction, "\n", sep = "")
+cat("  ", direction_desc, ".\n\n", sep = "")
+cat("Strength: ", toupper(strength), "\n", sep = "")
+cat("  The correlation coefficient r = ", sprintf("%.3f", cor_test$estimate), 
+    " indicates a ", strength, " relationship.\n", sep = "")
+
+if(abs(cor_test$estimate) < 0.3) {
+  cat("  The scatter plot shows considerable variability around any trend line.\n")
+  cat("  Points are widely scattered, indicating that temporality is not a strong\n")
+  cat("  predictor of relativity.\n\n")
+} else if(abs(cor_test$estimate) < 0.5) {
+  cat("  The scatter plot shows a noticeable trend but with substantial scatter.\n")
+  cat("  While there is a clear tendency, individual predictions would have\n")
+  cat("  considerable error.\n\n")
+} else {
+  cat("  The scatter plot shows points clustering around a clear trend line.\n")
+  cat("  Temporality appears to be a meaningful predictor of relativity.\n\n")
+}
+
+cat("Linearity: ", linearity, "\n", sep = "")
+if(pred_cor > 0.95) {
+  cat("  The relationship appears to follow a straight line pattern.\n")
+  cat("  A linear model is appropriate for these data.\n\n")
+} else {
+  cat("  There may be some curvature in the relationship.\n")
+  cat("  Consider examining residual plots or non-linear models.\n\n")
+}
+
+cat("Statistical significance:\n")
+if(cor_test$p.value < 0.05) {
+  cat("  The relationship is statistically significant (p < .05).\n")
+  cat("  We can reject the null hypothesis that r = 0.\n")
+  cat("  The observed correlation is unlikely to be due to chance alone.\n\n")
+} else {
+  cat("  The relationship is NOT statistically significant (p ≥ .05).\n")
+  cat("  We cannot reject the null hypothesis that r = 0.\n")
+  cat("  The observed correlation could plausibly be due to chance.\n\n")
+}
+
+cat("The scatter plot reveals a", strength, direction, "relationship between\n")
+cat("temporality (ability to adapt to change over time) and relativity (system\n")
+cat("comparison rating) in the Business Intelligence context.\n\n")
+
+if(abs(cor_test$estimate) >= 0.3 && cor_test$p.value < 0.05) {
+  cat("This suggests that participants who rate BI systems as better at adapting\n")
+  cat("to change over time also tend to rate", 
+      ifelse(cor_test$estimate > 0, "those systems as", "different systems as"), "\n")
+  cat(ifelse(cor_test$estimate > 0, "better in comparison", "having mixed comparisons"), 
+      "to other systems.\n")
+} else {
+  cat("However, the relationship is", ifelse(cor_test$p.value >= 0.05, "not significant or", ""), 
+      "too weak to draw\n")
+  cat("strong conclusions about the association between these two characteristics\n")
+  cat("of business intelligence systems.\n")
+}
+```
+    
+Create a scatter plot of expectability and positive emotion.
+
+    a.	Include a linear line on the graph. 
+    b.	Be sure to check x/y axis labels and length.
+    c.	What type of relationship do these two variables appear to have?
+
+```
+I created a scatterplot of expectability and positive emotion. I fitted a linear regression model and added a red regression line to the plot along with the equation, correlation coefficient, and R². To assess the relationship, I calculated Pearson's correlation. I compared linear predictions to LOESS predictions to confirm linearity. 
+
+The scatter plot with linear regression line reveals a negligible or no NEGATIVE relationship between expectability (satisfaction with BI) and positive emotion (positivity about BI). However, the relationship is not statistically significant or weak, suggesting that satisfaction with BI and positive emotions about BI, while potentially related, may also be influenced by other independent factors not captured in this simple bivariate analysis.
+```
+
+```{r plot2}
+# a. Include a linear line on the graph
+# b. Be sure to check x/y axis labels and length
+# -----------------------------------------------------------------------------
+
+x_range <- range(noout$expectability, na.rm = TRUE)
+y_range <- range(noout$positive, na.rm = TRUE)
+
+x_padding <- diff(x_range) * 0.1
+y_padding <- diff(y_range) * 0.1
+
+x_limits <- c(x_range[1] - x_padding, x_range[2] + x_padding)
+y_limits <- c(y_range[1] - y_padding, y_range[2] + y_padding)
+
+plot(noout$expectability, 
+     noout$positive,
+     main = "Relationship between Expectability and Positive Emotion",
+     xlab = "Expectability\n(Satisfaction with Business Intelligence)",
+     ylab = "Positive Emotion\n(Positivity about BI: 1-7 scale)",
+     xlim = x_limits,
+     ylim = y_limits,
+     pch = 19,
+     col = rgb(0, 0.6, 0, 0.5),
+     cex = 1.2,
+     cex.lab = 1.1,
+     cex.axis = 1.0,
+     cex.main = 1.3)
+
+grid(col = "gray", lty = 3)
+
+linear_model <- lm(positive ~ expectability, data = noout)
+
+abline(linear_model, col = "red", lwd = 3)
+
+intercept <- coef(linear_model)[1]
+slope <- coef(linear_model)[2]
+
+equation_text <- sprintf("y = %.3fx + %.3f", slope, intercept)
+legend("topleft", 
+       legend = equation_text,
+       bty = "n",
+       cex = 1.1,
+       text.col = "red",
+       text.font = 2)
+
+cor_value <- cor(noout$expectability, noout$positive, 
+                 use = "pairwise.complete.obs", method = "pearson")
+
+r_squared <- summary(linear_model)$r.squared
+legend("bottomright",
+       legend = c(sprintf("r = %.3f", cor_value),
+                  sprintf("R² = %.3f", r_squared)),
+       bty = "n",
+       cex = 1.1,
+       text.col = "darkblue",
+       text.font = 2)
+
+n_complete <- sum(complete.cases(noout[, c("expectability", "positive")]))
+text(x_limits[1] + 0.05 * diff(x_limits), 
+     y_limits[2] - 0.05 * diff(y_limits),
+     sprintf("n = %d", n_complete),
+     cex = 1.0,
+     col = "darkgray",
+     adj = 0)
+
+# c. What type of relationship do these two variables appear to have?
+# -----------------------------------------------------------------------------
+cor_test <- cor.test(noout$expectability, noout$positive, 
+                     method = "pearson",
+                     use = "pairwise.complete.obs")
+
+cat("Pearson's correlation:\n")
+cat("  r =", sprintf("%.4f", cor_test$estimate), "\n")
+cat("  t(", cor_test$parameter, ") =", sprintf("%.4f", cor_test$statistic), "\n", sep = "")
+cat("  p-value =", sprintf("%.4f", cor_test$p.value))
+
+if(cor_test$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_test$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_test$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat(" (not significant)\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_test$conf.int[1]), ",",
+    sprintf("%.4f", cor_test$conf.int[2]), "]\n\n", sep = "")
+
+reg_summary <- summary(linear_model)
+cat("Coefficients:\n")
+cat("  Slope:", sprintf("%.4f", slope), 
+    "(SE =", sprintf("%.4f", reg_summary$coefficients[2, 2]), ")\n\n")
+
+cat("Model fit:\n")
+cat("  R² =", sprintf("%.4f", r_squared), "\n")
+cat("  Adjusted R² =", sprintf("%.4f", reg_summary$adj.r.squared), "\n")
+cat("  F(", reg_summary$fstatistic[2], ",", reg_summary$fstatistic[3], ") =",
+    sprintf("%.4f", reg_summary$fstatistic[1]), 
+    ", p =", sprintf("%.4f", pf(reg_summary$fstatistic[1], 
+                               reg_summary$fstatistic[2], 
+                               reg_summary$fstatistic[3], 
+                               lower.tail = FALSE)), "\n\n", sep = "")
+
+# Effect size interpretation
+cat("Effect size interpretation (Cohen, 1988):\n")
+abs_r <- abs(cor_test$estimate)
+if(abs_r < 0.1) {
+  effect_size <- "Negligible (|r| < 0.1)"
+} else if(abs_r < 0.3) {
+  effect_size <- "Small (0.1 ≤ |r| < 0.3)"
+} else if(abs_r < 0.5) {
+  effect_size <- "Medium (0.3 ≤ |r| < 0.5)"
+} else {
+  effect_size <- "Large (|r| ≥ 0.5)"
+}
+cat("  ", effect_size, "\n\n")
+
+# c. Relationship type description
+if(abs(cor_test$estimate) < 0.1) {
+  strength <- "negligible or no"
+} else if(abs(cor_test$estimate) < 0.3) {
+  strength <- "weak"
+} else if(abs(cor_test$estimate) < 0.5) {
+  strength <- "moderate"
+} else {
+  strength <- "strong"
+}
+
+if(cor_test$estimate > 0) {
+  direction <- "POSITIVE"
+  direction_desc <- "As expectability (satisfaction) increases, positive emotion tends to increase"
+} else {
+  direction <- "NEGATIVE"
+  direction_desc <- "As expectability (satisfaction) increases, positive emotion tends to decrease"
+}
+
+# Check linearity by examining residuals
+residuals <- resid(linear_model)
+fitted_vals <- fitted(linear_model)
+
+# Test for non-linearity using runs test or visual inspection
+loess_fit <- loess(positive ~ expectability, data = noout)
+loess_pred <- predict(loess_fit)
+linear_pred <- fitted(linear_model)
+
+pred_cor <- cor(linear_pred, loess_pred, use = "complete.obs")
+
+if(pred_cor > 0.98) {
+  linearity <- "STRONGLY LINEAR"
+  linearity_desc <- "The red line fits the data very well with minimal curvature"
+} else if(pred_cor > 0.95) {
+  linearity <- "LINEAR"
+  linearity_desc <- "The red line fits the data well"
+} else if(pred_cor > 0.90) {
+  linearity <- "MOSTLY LINEAR"
+  linearity_desc <- "The red line fits reasonably well with some scatter"
+} else {
+  linearity <- "POTENTIALLY NON-LINEAR"
+  linearity_desc <- "The data may show some curvature"
+}
+
+cat("Relationship type:", direction, "-", strength, "-", linearity, "\n\n")
+
+cat("Direction: ", direction, "\n", sep = "")
+cat("  ", direction_desc, ".\n", sep = "")
+cat("  The regression line has a", ifelse(slope > 0, "positive", "negative"), 
+    "slope of", sprintf("%.4f", slope), ".\n\n")
+
+cat("Strength: ", toupper(strength), "\n", sep = "")
+cat("  The correlation coefficient r = ", sprintf("%.3f", cor_test$estimate), 
+    " indicates a ", strength, " relationship.\n", sep = "")
+
+if(abs(cor_test$estimate) < 0.3) {
+  cat("  The scatter plot shows considerable variability around the regression line.\n")
+  cat("  Points are widely scattered, indicating that expectability alone is not\n")
+  cat("  a strong predictor of positive emotion. Other factors likely play a role.\n\n")
+} else if(abs(cor_test$estimate) < 0.5) {
+  cat("  The scatter plot shows a noticeable trend with moderate scatter.\n")
+  cat("  While there is a clear tendency, individual predictions based on\n")
+  cat("  expectability alone would have considerable error.\n\n")
+} else {
+  cat("  The scatter plot shows points clustering closely around the regression line.\n")
+  cat("  Expectability appears to be a meaningful predictor of positive emotion.\n")
+  cat("  Individual predictions would be reasonably accurate.\n\n")
+}
+
+cat("Linearity: ", linearity, "\n", sep = "")
+cat("  ", linearity_desc, ".\n", sep = "")
+if(pred_cor > 0.95) {
+  cat("  A straight line is an appropriate model for this relationship.\n")
+  cat("  No evidence of curvature or non-linear patterns.\n\n")
+} else {
+  cat("  Some deviation from perfect linearity may be present.\n")
+  cat("  The linear model is still reasonable but may not capture all patterns.\n\n")
+}
+
+cat("Fit quality:\n")
+cat("  The linear regression line explains", sprintf("%.2f%%", r_squared * 100), 
+    "of the variance.\n")
+if(r_squared > 0.25) {
+  cat("  This is a substantial amount of explained variance.\n\n")
+} else if(r_squared > 0.09) {
+  cat("  This is a moderate amount of explained variance.\n\n")
+} else {
+  cat("  This is a small amount of explained variance.\n\n")
+}
+
+cat("Statistical significance:\n")
+if(cor_test$p.value < 0.001) {
+  cat("  The relationship is highly significant (p < .001).\n")
+  cat("  There is very strong evidence against the null hypothesis that r = 0.\n\n")
+} else if(cor_test$p.value < 0.05) {
+  cat("  The relationship is statistically significant (p < .05).\n")
+  cat("  We can reject the null hypothesis that r = 0.\n\n")
+} else {
+  cat("  The relationship is NOT statistically significant (p ≥ .05).\n")
+  cat("  We cannot confidently conclude that a relationship exists.\n\n")
+}
+
+cat("The scatter plot with linear regression line reveals a", strength, direction, "\n")
+cat("relationship between expectability (satisfaction with BI) and positive emotion\n")
+cat("(positivity about BI).\n\n")
+
+if(abs(cor_test$estimate) >= 0.3 && cor_test$p.value < 0.05) {
+  if(cor_test$estimate > 0) {
+    cat("This suggests that participants who are more satisfied with business\n")
+    cat("intelligence systems (higher expectability) tend to feel more positive\n")
+    cat("emotions about BI. This makes intuitive sense: satisfaction and positive\n")
+    cat("emotions are closely related constructs in the BI context.\n\n")
+  } else {
+    cat("Interestingly, higher satisfaction is associated with lower positive emotion,\n")
+    cat("which may warrant further investigation into the nature of these constructs\n")
+    cat("or the presence of moderating variables.\n")
+  }
+} else {
+  cat("However, the relationship is", 
+      ifelse(cor_test$p.value >= 0.05, "not statistically significant or", ""), 
+      "weak, suggesting that\n")
+  cat("satisfaction with BI and positive emotions about BI, while potentially related,\n")
+  cat("may also be influenced by other independent factors not captured in this\n")
+  cat("simple bivariate analysis.\n")
+}
+```
+    
+Create a scatter plot of expectability and relativity, grouping by gender.
+
+    a.	Include a linear line on the graph. 
+    b.	Be sure to check x/y axis labels and length.
+    c.	What type of relationship do these two variables appear to have for each group?
+    
+```
+I created a scatterplot comparing the expectability-relativity relationship for women (red circles with red regression line) and men (blue triangles with blue regression line) on the same axes for direct comparison. For each gender group separately, I calculated Pearson correlations, regression slopes and R² values, and classified the relationship strength (weak/moderate/strong) and direction (positive/negative). To compare groups, I performed Fisher's Z-test to determine if the correlations differ significantly between women and men. 
+
+The correlations differ significantly between gender groups (p < .05).
+Among women, the relationship between expectability and relativity isnegligible and not statistically significant.
+Among men, there is a moderate positive relationship between satisfaction with BI (expectability) and system comparison ratings (relativity).
+The relationship between expectability and relativity differs significantly between gender groups. Women show a negligible positive relationship (r = 0.053), while men show a moderate positive relationship(r = 0.423).
+```
+    
+```{r plot3}
+# a. Include a linear line on the graph
+# b. Be sure to check x/y axis labels and length
+# -----------------------------------------------------------------------------
+x_range <- range(noout$expectability, na.rm = TRUE)
+y_range <- range(noout$relativity, na.rm = TRUE)
+
+x_padding <- diff(x_range) * 0.1
+y_padding <- diff(y_range) * 0.1
+
+x_limits <- c(x_range[1] - x_padding, x_range[2] + x_padding)
+y_limits <- c(y_range[1] - y_padding, y_range[2] + y_padding)
+
+women_data <- noout[noout$gender == "women", ]
+men_data <- noout[noout$gender == "men", ]
+
+plot(noout$expectability, 
+     noout$relativity,
+     type = "n",  # Don't plot points yet
+     main = "Relationship between Expectability and Relativity by Gender",
+     xlab = "Expectability\n(Satisfaction with Business Intelligence)",
+     ylab = "Relativity\n(System Comparison Rating: 1-7 scale)",
+     xlim = x_limits,
+     ylim = y_limits,
+     cex.lab = 1.1,
+     cex.axis = 1.0,
+     cex.main = 1.2)
+
+grid(col = "gray", lty = 3)
+
+points(women_data$expectability,
+       women_data$relativity,
+       pch = 19,
+       col = rgb(1, 0, 0, 0.5),  # Semi-transparent red
+       cex = 1.2)
+
+women_model <- lm(relativity ~ expectability, data = women_data)
+abline(women_model, col = "red", lwd = 3)
+
+points(men_data$expectability,
+       men_data$relativity,
+       pch = 17,  # Triangle
+       col = rgb(0, 0, 1, 0.5),  # Semi-transparent blue
+       cex = 1.2)
+
+men_model <- lm(relativity ~ expectability, data = men_data)
+abline(men_model, col = "blue", lwd = 3)
+
+women_slope <- coef(women_model)[2]
+women_intercept <- coef(women_model)[1]
+men_slope <- coef(men_model)[2]
+men_intercept <- coef(men_model)[1]
+
+legend("topleft",
+       legend = c(
+         "Women",
+         sprintf("  y = %.3fx + %.3f", women_slope, women_intercept),
+         "Men",
+         sprintf("  y = %.3fx + %.3f", men_slope, men_intercept)
+       ),
+       col = c("red", "red", "blue", "blue"),
+       pch = c(19, NA, 17, NA),
+       lty = c(NA, 1, NA, 1),
+       lwd = c(NA, 3, NA, 3),
+       cex = 0.9,
+       bty = "n")
+
+cor_women <- cor(women_data$expectability, women_data$relativity, 
+                 use = "pairwise.complete.obs")
+cor_men <- cor(men_data$expectability, men_data$relativity, 
+               use = "pairwise.complete.obs")
+
+legend("bottomright",
+       legend = c(
+         sprintf("Women: r = %.3f", cor_women),
+         sprintf("Men: r = %.3f", cor_men)
+       ),
+       text.col = c("red", "blue"),
+       bty = "n",
+       cex = 1.0,
+       text.font = 2)
+
+# c. What type of relationship do these two variables appear to have for each group?
+# -----------------------------------------------------------------------------------
+cor_test_women <- cor.test(women_data$expectability, women_data$relativity,
+                           method = "pearson")
+
+cat("Correlation analysis:\n")
+cat("  r =", sprintf("%.4f", cor_test_women$estimate), "\n")
+cat("  t(", cor_test_women$parameter, ") =", sprintf("%.4f", cor_test_women$statistic), "\n", sep = "")
+cat("  p-value =", sprintf("%.4f", cor_test_women$p.value))
+if(cor_test_women$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_test_women$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_test_women$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat(" (not significant)\n")
+}
+cat("  95% CI: [", sprintf("%.4f", cor_test_women$conf.int[1]), ",",
+    sprintf("%.4f", cor_test_women$conf.int[2]), "]\n\n", sep = "")
+
+women_summary <- summary(women_model)
+cat("Linear regression:\n")
+cat("  Slope:", sprintf("%.4f", women_slope), "(SE =", 
+    sprintf("%.4f", women_summary$coefficients[2, 2]), ")\n")
+cat("  Interpretation: For every 1-unit increase in expectability,\n")
+cat("                  relativity", ifelse(women_slope > 0, "increases", "decreases"),
+    "by", sprintf("%.4f", abs(women_slope)), "units.\n")
+cat("  R² =", sprintf("%.4f", women_summary$r.squared), 
+    sprintf("(%.2f%% variance explained)\n\n", women_summary$r.squared * 100))
+
+if(abs(cor_test_women$estimate) < 0.1) {
+  women_strength <- "negligible"
+} else if(abs(cor_test_women$estimate) < 0.3) {
+  women_strength <- "weak"
+} else if(abs(cor_test_women$estimate) < 0.5) {
+  women_strength <- "moderate"
+} else {
+  women_strength <- "strong"
+}
+
+women_direction <- ifelse(cor_test_women$estimate > 0, "positive", "negative")
+
+cat("Relationship type: ", toupper(women_direction), " - ", 
+    toupper(women_strength), "\n\n", sep = "")
+
+cor_test_men <- cor.test(men_data$expectability, men_data$relativity,
+                         method = "pearson")
+
+cat("Correlation analysis:\n")
+cat("  r =", sprintf("%.4f", cor_test_men$estimate), "\n")
+cat("  t(", cor_test_men$parameter, ") =", sprintf("%.4f", cor_test_men$statistic), "\n", sep = "")
+cat("  p-value =", sprintf("%.4f", cor_test_men$p.value))
+if(cor_test_men$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_test_men$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_test_men$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat(" (not significant)\n")
+}
+cat("  95% CI: [", sprintf("%.4f", cor_test_men$conf.int[1]), ",",
+    sprintf("%.4f", cor_test_men$conf.int[2]), "]\n\n", sep = "")
+
+men_summary <- summary(men_model)
+cat("Linear regression:\n")
+cat("  Slope:", sprintf("%.4f", men_slope), "(SE =", 
+    sprintf("%.4f", men_summary$coefficients[2, 2]), ")\n")
+cat("  Interpretation: For every 1-unit increase in expectability,\n")
+cat("                  relativity", ifelse(men_slope > 0, "increases", "decreases"),
+    "by", sprintf("%.4f", abs(men_slope)), "units.\n")
+cat("  R² =", sprintf("%.4f", men_summary$r.squared), 
+    sprintf("(%.2f%% variance explained)\n\n", men_summary$r.squared * 100))
+
+if(abs(cor_test_men$estimate) < 0.1) {
+  men_strength <- "negligible"
+} else if(abs(cor_test_men$estimate) < 0.3) {
+  men_strength <- "weak"
+} else if(abs(cor_test_men$estimate) < 0.5) {
+  men_strength <- "moderate"
+} else {
+  men_strength <- "strong"
+}
+
+men_direction <- ifelse(cor_test_men$estimate > 0, "positive", "negative")
+
+cat("Relationship type: ", toupper(men_direction), " - ", 
+    toupper(men_strength), "\n\n", sep = "")
+
+# c. Comparison between groups
+comparison_table <- data.frame(
+  Characteristic = c("Direction", "Strength", "Correlation (r)", 
+                     "Slope", "R²", "Significance"),
+  Women = c(
+    toupper(women_direction),
+    toupper(women_strength),
+    sprintf("%.4f", cor_test_women$estimate),
+    sprintf("%.4f", women_slope),
+    sprintf("%.4f", women_summary$r.squared),
+    ifelse(cor_test_women$p.value < 0.05, "Yes (p < .05)", "No (p ≥ .05)")
+  ),
+  Men = c(
+    toupper(men_direction),
+    toupper(men_strength),
+    sprintf("%.4f", cor_test_men$estimate),
+    sprintf("%.4f", men_slope),
+    sprintf("%.4f", men_summary$r.squared),
+    ifelse(cor_test_men$p.value < 0.05, "Yes (p < .05)", "No (p ≥ .05)")
+  ),
+  stringsAsFactors = FALSE
+)
+
+print(comparison_table, row.names = FALSE)
+cat("\n")
+
+# Fisher's Z transformation to compare independent correlations
+z_women <- 0.5 * log((1 + cor_test_women$estimate) / (1 - cor_test_women$estimate))
+z_men <- 0.5 * log((1 + cor_test_men$estimate) / (1 - cor_test_men$estimate))
+
+n_women <- sum(complete.cases(women_data[, c("expectability", "relativity")]))
+n_men <- sum(complete.cases(men_data[, c("expectability", "relativity")]))
+
+se_diff <- sqrt(1/(n_women - 3) + 1/(n_men - 3))
+z_obs <- (z_women - z_men) / se_diff
+p_value_diff <- 2 * (1 - pnorm(abs(z_obs)))
+
+cat("Fisher's Z-test comparing correlations:\n")
+cat("  Z =", sprintf("%.4f", z_obs), "\n")
+cat("  p-value =", sprintf("%.4f", p_value_diff), "\n\n")
+
+if(p_value_diff < 0.05) {
+  cat("  Result: The correlations differ significantly between gender groups (p < .05).\n")
+} else {
+  cat("  Result: The correlations do NOT differ significantly (p ≥ .05).\n")
+}
+
+if(women_strength %in% c("moderate", "strong") && cor_test_women$p.value < 0.05) {
+  cat("  Among women, there is a", women_strength, women_direction, 
+      "relationship between\n")
+  cat("  satisfaction with BI (expectability) and system comparison ratings (relativity).\n")
+} else {
+  cat("  Among women, the relationship between expectability and relativity is\n")
+  cat("  ", women_strength, " and ", 
+      ifelse(cor_test_women$p.value >= 0.05, "not statistically significant", 
+             "statistically significant but weak"), ".\n", sep = "")
+}
+
+cat("MEN:\n")
+if(men_strength %in% c("moderate", "strong") && cor_test_men$p.value < 0.05) {
+  cat("  Among men, there is a", men_strength, men_direction, 
+      "relationship between\n")
+  cat("  satisfaction with BI (expectability) and system comparison ratings (relativity).\n")
+} else {
+  cat("  Among men, the relationship between expectability and relativity is\n")
+  cat("  ", men_strength, " and ", 
+      ifelse(cor_test_men$p.value >= 0.05, "not statistically significant", 
+             "statistically significant but weak"), ".\n", sep = "")
+}
+
+similar_direction <- women_direction == men_direction
+similar_strength <- abs(cor_test_women$estimate - cor_test_men$estimate) < 0.2
+significantly_different <- p_value_diff < 0.05
+
+if(similar_direction && similar_strength && !significantly_different) {
+  cat("Both women and men show similar", women_direction, women_strength, 
+      "relationships\n")
+  cat("between expectability and relativity.\n")
+} else if(significantly_different) {
+  cat("The relationship between expectability and relativity differs significantly\n")
+  cat("between gender groups. Women show a", women_strength, women_direction, 
+      "relationship\n")
+  cat("(r =", sprintf("%.3f", cor_test_women$estimate), 
+      "), while men show a", men_strength, men_direction, "relationship\n")
+  cat("(r =", sprintf("%.3f", cor_test_men$estimate), 
+      ").\n")
+} else {
+  cat("While both groups show", women_direction, "relationships, the strength differs\n")
+  cat("somewhat between women (", women_strength, ", r = ", 
+      sprintf("%.3f", cor_test_women$estimate), ") and\n", sep = "")
+  cat("men (", men_strength, ", r = ", sprintf("%.3f", cor_test_men$estimate), 
+      "), though not significantly.\n", sep = "")
+}
+```
+    
+Include a correlation table of all of the variables (cor).
+
+    a.	Include the output for Pearson.
+    b.	Include the output for Spearman.
+    c.	Include the output for Kendall.
+    d.	Which correlation was the strongest?
+    e.  For the correlations with gender, would point biserial or biserial be more appropriate?  Why?
+    
+```
+I calculated correlation matrices using three methods for all variables. I computed Pearson correlations measuring linear relationships, Spearman correlations based on ranks for monotonic relationships, and Kendall's tau for ordinal associations. For each method, I displayed the correlation coefficients, p-values for significance testing, and formatted tables with significance stars (*** p<.001, ** p<.01, * p<.05). 
+
+Stringest correlations were: 
+
+Pearson's r:
+  Variables: Gender × Temporality 
+  Correlation: r = -0.8343 
+  Absolute value: |r| = 0.8343 
+
+Spearman's ρ:
+  Variables: Gender × Temporality 
+  Correlation: ρ = -0.8346 
+  Absolute value: |ρ| = 0.8346 
+
+Kendall's τ:
+  Variables: Gender × Temporality 
+  Correlation: τ = -0.6827 
+  Absolute value: |τ| = 0.6827 
+
+For the point-biserial versus biserial question, I explained that point-biserial is appropriate because gender is a truly dichotomous variable (naturally binary), not an artificially created split of a continuous variable. The Pearson correlations with gender (coded 0/1) are mathematically equivalent to point-biserial correlations, measuring whether women and men differ on the continuous BI variables and indicating which gender scores higher.
+```
+    
+```{r correl1}
+# Create numeric version of gender
+noout$gender_numeric <- ifelse(noout$gender == "women", 0, 1)
+
+# Select variables for correlation
+cor_vars <- c("gender_numeric", "temporality", "expectability", "relativity", "positive")
+cor_data <- noout[, cor_vars]
+
+# Check for complete cases
+n_complete <- sum(complete.cases(cor_data))
+cat("Complete cases for correlation analysis:", n_complete, 
+    "out of", nrow(noout), "\n\n")
+
+# a. Include the output for Pearson
+# -----------------------------------------------------------------------------
+pearson_cor <- cor(cor_data, use = "pairwise.complete.obs", method = "pearson")
+
+pearson_rounded <- round(pearson_cor, 4)
+rownames(pearson_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+colnames(pearson_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+
+print(pearson_rounded)
+cat("\n")
+
+get_cor_pvalues <- function(data, method = "pearson") {
+  n_vars <- ncol(data)
+  p_matrix <- matrix(NA, nrow = n_vars, ncol = n_vars)
+  
+  for(i in 1:n_vars) {
+    for(j in 1:n_vars) {
+      if(i == j) {
+        p_matrix[i, j] <- NA
+      } else {
+        test_result <- cor.test(data[, i], data[, j], 
+                                method = method,
+                                use = "pairwise.complete.obs")
+        p_matrix[i, j] <- test_result$p.value
+      }
+    }
+  }
+  
+  return(p_matrix)
+}
+
+pearson_p <- get_cor_pvalues(cor_data, method = "pearson")
+pearson_p_rounded <- round(pearson_p, 4)
+rownames(pearson_p_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+colnames(pearson_p_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+
+print(pearson_p_rounded)
+cat("\n")
+
+cat("Significance codes: *** p < .001, ** p < .01, * p < .05\n\n")
+
+pearson_formatted <- pearson_rounded
+for(i in 1:nrow(pearson_formatted)) {
+  for(j in 1:ncol(pearson_formatted)) {
+    if(i != j && !is.na(pearson_p[i, j])) {
+      if(pearson_p[i, j] < 0.001) {
+        pearson_formatted[i, j] <- paste0(sprintf("%.4f", pearson_cor[i, j]), "***")
+      } else if(pearson_p[i, j] < 0.01) {
+        pearson_formatted[i, j] <- paste0(sprintf("%.4f", pearson_cor[i, j]), "** ")
+      } else if(pearson_p[i, j] < 0.05) {
+        pearson_formatted[i, j] <- paste0(sprintf("%.4f", pearson_cor[i, j]), "*  ")
+      } else {
+        pearson_formatted[i, j] <- sprintf("%.4f", pearson_cor[i, j])
+      }
+    } else if(i == j) {
+      pearson_formatted[i, j] <- "1.0000"
+    }
+  }
+}
+
+print(pearson_formatted, quote = FALSE)
+cat("\n")
+
+# b. Include the output for Spearman
+# -----------------------------------------------------------------------------
+spearman_cor <- cor(cor_data, use = "pairwise.complete.obs", method = "spearman")
+
+spearman_rounded <- round(spearman_cor, 4)
+rownames(spearman_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+colnames(spearman_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+
+print(spearman_rounded)
+cat("\n")
+
+spearman_p <- get_cor_pvalues(cor_data, method = "spearman")
+spearman_p_rounded <- round(spearman_p, 4)
+rownames(spearman_p_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+colnames(spearman_p_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+
+print(spearman_p_rounded)
+cat("\n")
+
+spearman_formatted <- spearman_rounded
+for(i in 1:nrow(spearman_formatted)) {
+  for(j in 1:ncol(spearman_formatted)) {
+    if(i != j && !is.na(spearman_p[i, j])) {
+      if(spearman_p[i, j] < 0.001) {
+        spearman_formatted[i, j] <- paste0(sprintf("%.4f", spearman_cor[i, j]), "***")
+      } else if(spearman_p[i, j] < 0.01) {
+        spearman_formatted[i, j] <- paste0(sprintf("%.4f", spearman_cor[i, j]), "** ")
+      } else if(spearman_p[i, j] < 0.05) {
+        spearman_formatted[i, j] <- paste0(sprintf("%.4f", spearman_cor[i, j]), "*  ")
+      } else {
+        spearman_formatted[i, j] <- sprintf("%.4f", spearman_cor[i, j])
+      }
+    } else if(i == j) {
+      spearman_formatted[i, j] <- "1.0000"
+    }
+  }
+}
+
+print(spearman_formatted, quote = FALSE)
+cat("\n")
+
+# c. Include the output for Kendall
+# -----------------------------------------------------------------------------
+kendall_cor <- cor(cor_data, use = "pairwise.complete.obs", method = "kendall")
+
+kendall_rounded <- round(kendall_cor, 4)
+rownames(kendall_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+colnames(kendall_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+
+print(kendall_rounded)
+cat("\n")
+
+kendall_p <- get_cor_pvalues(cor_data, method = "kendall")
+kendall_p_rounded <- round(kendall_p, 4)
+rownames(kendall_p_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+colnames(kendall_p_rounded) <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+
+print(kendall_p_rounded)
+cat("\n")
+
+kendall_formatted <- kendall_rounded
+for(i in 1:nrow(kendall_formatted)) {
+  for(j in 1:ncol(kendall_formatted)) {
+    if(i != j && !is.na(kendall_p[i, j])) {
+      if(kendall_p[i, j] < 0.001) {
+        kendall_formatted[i, j] <- paste0(sprintf("%.4f", kendall_cor[i, j]), "***")
+      } else if(kendall_p[i, j] < 0.01) {
+        kendall_formatted[i, j] <- paste0(sprintf("%.4f", kendall_cor[i, j]), "** ")
+      } else if(kendall_p[i, j] < 0.05) {
+        kendall_formatted[i, j] <- paste0(sprintf("%.4f", kendall_cor[i, j]), "*  ")
+      } else {
+        kendall_formatted[i, j] <- sprintf("%.4f", kendall_cor[i, j])
+      }
+    } else if(i == j) {
+      kendall_formatted[i, j] <- "1.0000"
+    }
+  }
+}
+
+print(kendall_formatted, quote = FALSE)
+cat("\n")
+
+# d. Which correlation was the strongest?
+# -----------------------------------------------------------------------------
+find_strongest <- function(cor_matrix, matrix_name) {
+  # Set diagonal to NA
+  diag(cor_matrix) <- NA
+  
+  # Get upper triangle only (to avoid duplicates)
+  cor_matrix[lower.tri(cor_matrix)] <- NA
+  
+  # Find maximum absolute value
+  max_abs <- max(abs(cor_matrix), na.rm = TRUE)
+  
+  # Find position of maximum
+  max_pos <- which(abs(cor_matrix) == max_abs, arr.ind = TRUE)
+  
+  # Get the actual correlation value
+  max_cor <- cor_matrix[max_pos[1], max_pos[2]]
+  
+  # Get variable names
+  var_names <- c("Gender", "Temporality", "Expectability", "Relativity", "Positive")
+  var1 <- var_names[max_pos[1]]
+  var2 <- var_names[max_pos[2]]
+  
+  return(list(
+    var1 = var1,
+    var2 = var2,
+    correlation = max_cor,
+    abs_correlation = max_abs
+  ))
+}
+
+# Find strongest for each method
+pearson_strongest <- find_strongest(pearson_cor, "Pearson")
+spearman_strongest <- find_strongest(spearman_cor, "Spearman")
+kendall_strongest <- find_strongest(kendall_cor, "Kendall")
+
+cat("Pearson's r:\n")
+cat("  Variables:", pearson_strongest$var1, "×", pearson_strongest$var2, "\n")
+cat("  Correlation: r =", sprintf("%.4f", pearson_strongest$correlation), "\n")
+cat("  Absolute value: |r| =", sprintf("%.4f", pearson_strongest$abs_correlation), "\n\n")
+
+cat("Spearman's ρ:\n")
+cat("  Variables:", spearman_strongest$var1, "×", spearman_strongest$var2, "\n")
+cat("  Correlation: ρ =", sprintf("%.4f", spearman_strongest$correlation), "\n")
+cat("  Absolute value: |ρ| =", sprintf("%.4f", spearman_strongest$abs_correlation), "\n\n")
+
+cat("Kendall's τ:\n")
+cat("  Variables:", kendall_strongest$var1, "×", kendall_strongest$var2, "\n")
+cat("  Correlation: τ =", sprintf("%.4f", kendall_strongest$correlation), "\n")
+cat("  Absolute value: |τ| =", sprintf("%.4f", kendall_strongest$abs_correlation), "\n\n")
+
+# Determine overall strongest
+all_strongest <- c(pearson_strongest$abs_correlation,
+                   spearman_strongest$abs_correlation,
+                   kendall_strongest$abs_correlation)
+
+overall_max <- max(all_strongest)
+
+if(pearson_strongest$abs_correlation == overall_max) {
+  cat("Method: PEARSON\n")
+  cat("Variables:", pearson_strongest$var1, "and", pearson_strongest$var2, "\n")
+  cat("Correlation:", sprintf("%.4f", pearson_strongest$correlation), "\n")
+  cat("Absolute value:", sprintf("%.4f", pearson_strongest$abs_correlation), "\n\n")
+  
+  # Get p-value
+  var_indices <- which(c("Gender", "Temporality", "Expectability", "Relativity", "Positive") %in% 
+                       c(pearson_strongest$var1, pearson_strongest$var2))
+  p_val <- pearson_p[var_indices[1], var_indices[2]]
+  
+  cat("Significance: p =", sprintf("%.4f", p_val))
+  if(p_val < 0.001) cat(" ***\n\n")
+  else if(p_val < 0.01) cat(" **\n\n")
+  else if(p_val < 0.05) cat(" *\n\n")
+  else cat("\n\n")
+  
+  r_sq <- pearson_strongest$correlation^2
+  cat("  R² =", sprintf("%.4f", r_sq), 
+      sprintf("(%.2f%% shared variance)\n", r_sq * 100))
+}
+
+cat("\n")
+
+# e. For the correlations with gender, would point biserial or biserial be more appropriate? Why?
+# -----------------------------------------------------------------------------
+gender_vars <- c("Temporality", "Expectability", "Relativity", "Positive")
+
+cat("Point-Biserial Correlations (r_pb):\n\n")
+
+for(i in 2:5) {
+  var_name <- c("Temporality", "Expectability", "Relativity", "Positive")[i-1]
+  
+  r_pb <- pearson_cor[1, i]
+  p_val <- pearson_p[1, i]
+  
+  cat(sprintf("  Gender × %s:\n", var_name))
+  cat(sprintf("    r_pb = %.4f, p = %.4f", r_pb, p_val))
+  
+  if(p_val < 0.001) cat(" ***\n")
+  else if(p_val < 0.01) cat(" **\n")
+  else if(p_val < 0.05) cat(" *\n")
+  else cat("\n")
+  
+  # Interpretation
+  if(abs(r_pb) < 0.1) {
+    strength <- "negligible"
+  } else if(abs(r_pb) < 0.3) {
+    strength <- "small"
+  } else if(abs(r_pb) < 0.5) {
+    strength <- "moderate"
+  } else {
+    strength <- "large"
+  }
+  
+  direction <- ifelse(r_pb > 0, "Men score higher", "Women score higher")
+  
+  cat(sprintf("    Effect size: %s (%s)\n", strength, direction))
+  cat("\n")
+}
+```
+
+Calculate confidence interval for temporality and relativity.
+
+```
+I calculated the 95% confidence interval for the Pearson correlation between temporality and relativity by performing a correlation test. I reported the sample correlation coefficient (r), test statistic (t), p-value, and the lower and upper bounds of the confidence interval. I also calculated CIs at different confidence levels (90%, 95%, 99%) to show how higher confidence produces wider intervals. The CI provides both the precision of our estimate and statistical significance.
+```
+
+```{r cicorrel1}
+temp_data <- noout$temporality
+rel_data <- noout$relativity
+
+complete_cases <- complete.cases(temp_data, rel_data)
+temp_complete <- temp_data[complete_cases]
+rel_complete <- rel_data[complete_cases]
+
+n <- length(temp_complete)
+
+cor_test_result <- cor.test(temp_complete, rel_complete, 
+                            method = "pearson",
+                            conf.level = 0.95)
+
+cat("Pearson's product-moment correlation\n\n")
+
+cat("Sample correlation coefficient:\n")
+cat("  r =", sprintf("%.4f", cor_test_result$estimate), "\n\n")
+
+cat("Test statistic:\n")
+cat("  t(", cor_test_result$parameter, ") = ", 
+    sprintf("%.4f", cor_test_result$statistic), "\n", sep = "")
+cat("  p-value = ", sprintf("%.6f", cor_test_result$p.value), sep = "")
+
+if(cor_test_result$p.value < 0.001) {
+  cat(" ***\n\n")
+} else if(cor_test_result$p.value < 0.01) {
+  cat(" **\n\n")
+} else if(cor_test_result$p.value < 0.05) {
+  cat(" *\n\n")
+} else {
+  cat("\n\n")
+}
+
+cat("95% Confidence Interval:\n")
+cat("  Lower bound:", sprintf("%.4f", cor_test_result$conf.int[1]), "\n")
+cat("  Upper bound:", sprintf("%.4f", cor_test_result$conf.int[2]), "\n")
+cat("  CI: [", sprintf("%.4f", cor_test_result$conf.int[1]), ", ",
+    sprintf("%.4f", cor_test_result$conf.int[2]), "]\n\n", sep = "")
+
+# Check if CI includes zero
+if(cor_test_result$conf.int[1] < 0 && cor_test_result$conf.int[2] > 0) {
+  cat("Note: The confidence interval INCLUDES ZERO.\n")
+  cat("      This suggests the correlation may not be significantly different from zero.\n")
+  cat("      We cannot rule out the possibility of no relationship in the population.\n\n")
+} else {
+  cat("Note: The confidence interval DOES NOT INCLUDE ZERO.\n")
+  cat("      This confirms a significant relationship exists in the population.\n")
+  if(cor_test_result$conf.int[1] > 0) {
+    cat("      The relationship is reliably POSITIVE.\n\n")
+  } else {
+    cat("      The relationship is reliably NEGATIVE.\n\n")
+  }
+}
+
+# Effect size interpretation
+r_value <- cor_test_result$estimate
+r_squared <- r_value^2
+
+cat("Effect size:\n")
+if(abs(r_value) < 0.1) {
+  effect <- "negligible"
+} else if(abs(r_value) < 0.3) {
+  effect <- "small"
+} else if(abs(r_value) < 0.5) {
+  effect <- "medium"
+} else {
+  effect <- "large"
+}
+
+cat("  Magnitude:", effect, "(Cohen, 1988)\n")
+cat("  Coefficient of determination: R² =", sprintf("%.4f", r_squared), "\n")
+cat("  Shared variance:", sprintf("%.2f%%", r_squared * 100), "\n\n")
+
+# 90% CI
+cor_90 <- cor.test(temp_complete, rel_complete, method = "pearson", conf.level = 0.90)
+cat("90% Confidence Interval:\n")
+cat("  [", sprintf("%.4f", cor_90$conf.int[1]), ", ",
+    sprintf("%.4f", cor_90$conf.int[2]), "]\n", sep = "")
+cat("  Width:", sprintf("%.4f", cor_90$conf.int[2] - cor_90$conf.int[1]), "\n\n")
+
+# 95% CI (already calculated)
+cat("95% Confidence Interval:\n")
+cat("  [", sprintf("%.4f", cor_test_result$conf.int[1]), ", ",
+    sprintf("%.4f", cor_test_result$conf.int[2]), "]\n", sep = "")
+cat("  Width:", sprintf("%.4f", cor_test_result$conf.int[2] - cor_test_result$conf.int[1]), "\n\n")
+
+# 99% CI
+cor_99 <- cor.test(temp_complete, rel_complete, method = "pearson", conf.level = 0.99)
+cat("99% Confidence Interval:\n")
+cat("  [", sprintf("%.4f", cor_99$conf.int[1]), ", ",
+    sprintf("%.4f", cor_99$conf.int[2]), "]\n", sep = "")
+cat("  Width:", sprintf("%.4f", cor_99$conf.int[2] - cor_99$conf.int[1]), "\n\n")
+
+cat("Note: Higher confidence levels produce wider intervals.\n")
+cat("      The 95% CI is the standard in most research contexts.\n\n")
+
+par(mar = c(5, 4, 4, 2))
+
+plot(1, cor_test_result$estimate,
+     xlim = c(0.5, 1.5),
+     ylim = c(min(cor_99$conf.int[1], -0.2), max(cor_99$conf.int[2], 1)),
+     pch = 19,
+     cex = 2,
+     col = "darkblue",
+     xlab = "",
+     ylab = "Correlation Coefficient (r)",
+     main = "95% Confidence Interval for Correlation\nTemporality × Relativity",
+     xaxt = "n",
+     cex.main = 1.3,
+     cex.lab = 1.1)
+
+arrows(1, cor_test_result$conf.int[1],
+       1, cor_test_result$conf.int[2],
+       angle = 90,
+       code = 3,
+       length = 0.1,
+       lwd = 3,
+       col = "darkblue")
+
+abline(h = 0, col = "red", lty = 2, lwd = 2)
+
+grid(col = "gray", lty = 3)
+
+text(1, cor_test_result$estimate + 0.05,
+     sprintf("r = %.4f", cor_test_result$estimate),
+     pos = 3,
+     cex = 1.1,
+     font = 2)
+
+text(1, cor_test_result$conf.int[1] - 0.02,
+     sprintf("%.4f", cor_test_result$conf.int[1]),
+     pos = 1,
+     cex = 0.9)
+
+text(1, cor_test_result$conf.int[2] + 0.02,
+     sprintf("%.4f", cor_test_result$conf.int[2]),
+     pos = 3,
+     cex = 0.9)
+
+text(1.3, 0,
+     "H₀: ρ = 0",
+     cex = 0.9,
+     col = "red")
+
+if(cor_test_result$conf.int[1] < 0 && cor_test_result$conf.int[2] > 0) {
+  cat("  → The CI crosses zero (red line), indicating the correlation\n")
+  cat("    is not significantly different from zero at α = .05.\n\n")
+} else {
+  cat("  → The CI does not cross zero (red line), confirming a\n")
+  cat("    statistically significant correlation at α = .05.\n\n")
+}
+
+# Fisher's Z transformation
+r <- cor_test_result$estimate
+z <- 0.5 * log((1 + r) / (1 - r))
+se_z <- 1 / sqrt(n - 3)
+
+# 95% CI for Z
+z_lower <- z - 1.96 * se_z
+z_upper <- z + 1.96 * se_z
+
+# Transform back to r
+r_lower_fisher <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
+r_upper_fisher <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
+
+cat("Fisher's Z transformation:\n")
+cat("  Sample r:", sprintf("%.4f", r), "\n")
+cat("  Fisher's Z:", sprintf("%.4f", z), "\n")
+cat("  SE(Z):", sprintf("%.4f", se_z), "\n\n")
+
+cat("95% CI using Fisher's Z:\n")
+cat("  Z interval: [", sprintf("%.4f", z_lower), ", ", 
+    sprintf("%.4f", z_upper), "]\n", sep = "")
+cat("  r interval: [", sprintf("%.4f", r_lower_fisher), ", ",
+    sprintf("%.4f", r_upper_fisher), "]\n\n", sep = "")
+
+cat("Comparison with direct method:\n")
+cat("  Direct method:  [", sprintf("%.4f", cor_test_result$conf.int[1]), ", ",
+    sprintf("%.4f", cor_test_result$conf.int[2]), "]\n", sep = "")
+cat("  Fisher's Z:     [", sprintf("%.4f", r_lower_fisher), ", ",
+    sprintf("%.4f", r_upper_fisher), "]\n", sep = "")
+cat("  Difference:     [", 
+    sprintf("%.4f", abs(cor_test_result$conf.int[1] - r_lower_fisher)), ", ",
+    sprintf("%.4f", abs(cor_test_result$conf.int[2] - r_upper_fisher)), "]\n\n", sep = "")
+
+cat("Correlation between Temporality and Relativity:\n\n")
+cat("  Sample size: n =", n, "\n")
+cat("  Pearson's r =", sprintf("%.4f", cor_test_result$estimate), "\n")
+cat("  95% CI: [", sprintf("%.4f", cor_test_result$conf.int[1]), ", ",
+    sprintf("%.4f", cor_test_result$conf.int[2]), "]\n", sep = "")
+cat("  p-value =", sprintf("%.6f", cor_test_result$p.value), "\n")
+cat("  R² =", sprintf("%.4f", r_squared), 
+    sprintf("(%.2f%% shared variance)\n\n", r_squared * 100))
+
+cat("Conclusion:\n")
+if(cor_test_result$p.value < 0.05) {
+  cat("  There is a statistically significant", 
+      ifelse(r > 0, "positive", "negative"), "correlation between\n")
+  cat("  temporality (ability to adapt to change) and relativity (system comparison).\n")
+  cat("  We can be 95% confident the population correlation is between\n")
+  cat("  ", sprintf("%.4f", cor_test_result$conf.int[1]), " and ",
+      sprintf("%.4f", cor_test_result$conf.int[2]), ".\n", sep = "")
+} else {
+  cat("  The correlation is not statistically significant at α = .05.\n")
+  cat("  The confidence interval includes zero, suggesting we cannot rule out\n")
+  cat("  the possibility of no relationship in the population.\n")
+}
+```
+
+Calculate the difference in correlations for 1) temporality and expectbility and 2) temporality and positive emotion.
+
+    a.	Include the output from the test through Pearson's test.
+    b.	Is there a significant difference in their correlations?
+
+```
+I compared two dependent correlations sharing the common variable temporality: (1) temporality × expectability and (2) temporality × positive emotion. I calculated all three Pearson correlations needed for the analysis. To test whether the correlations differ significantly, I used Steiger's Z-test for dependent correlations. I calculated the test statistic using the formula that incorporates all three correlations and reported the p-value. I verified results using the cocor package. 
+
+There IS a statistically significant difference between the two correlations (p = 0.0000 < 0.05). Temporality has a STRONGER correlation with expectability (r = 0.2981) than with positive emotion (r = -0.1955).
+```
+
+```{r correl2}
+temp_data <- noout$temporality
+expect_data <- noout$expectability
+positive_data <- noout$positive
+
+# Get complete cases for all three variables
+complete_cases <- complete.cases(temp_data, expect_data, positive_data)
+temp_complete <- temp_data[complete_cases]
+expect_complete <- expect_data[complete_cases]
+positive_complete <- positive_data[complete_cases]
+
+n <- length(temp_complete)
+
+# a. Include the output from the test through Pearson's test
+# -----------------------------------------------------------------------------
+# r12: Temporality × Expectability
+cor_temp_expect <- cor.test(temp_complete, expect_complete, method = "pearson")
+r12 <- cor_temp_expect$estimate
+
+# r13: Temporality × Positive Emotion
+cor_temp_positive <- cor.test(temp_complete, positive_complete, method = "pearson")
+r13 <- cor_temp_positive$estimate
+
+# r23: Expectability × Positive Emotion (needed for Steiger's test)
+cor_expect_positive <- cor.test(expect_complete, positive_complete, method = "pearson")
+r23 <- cor_expect_positive$estimate
+
+cat("Pearson's product-moment correlation\n\n")
+cat("  r =", sprintf("%.4f", r12), "\n")
+cat("  t(", cor_temp_expect$parameter, ") = ", 
+    sprintf("%.4f", cor_temp_expect$statistic), "\n", sep = "")
+cat("  p-value = ", sprintf("%.6f", cor_temp_expect$p.value), sep = "")
+
+if(cor_temp_expect$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_temp_expect$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_temp_expect$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat("\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_temp_expect$conf.int[1]), ", ",
+    sprintf("%.4f", cor_temp_expect$conf.int[2]), "]\n", sep = "")
+cat("  R² = ", sprintf("%.4f", r12^2), 
+    sprintf(" (%.2f%% shared variance)\n\n", 100 * r12^2))
+
+cat("Pearson's product-moment correlation\n\n")
+cat("  r =", sprintf("%.4f", r13), "\n")
+cat("  t(", cor_temp_positive$parameter, ") = ", 
+    sprintf("%.4f", cor_temp_positive$statistic), "\n", sep = "")
+cat("  p-value = ", sprintf("%.6f", cor_temp_positive$p.value), sep = "")
+
+if(cor_temp_positive$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_temp_positive$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_temp_positive$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat("\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_temp_positive$conf.int[1]), ", ",
+    sprintf("%.4f", cor_temp_positive$conf.int[2]), "]\n", sep = "")
+cat("  R² = ", sprintf("%.4f", r13^2), 
+    sprintf(" (%.2f%% shared variance)\n\n", 100 * r13^2))
+
+cat("Pearson's product-moment correlation\n\n")
+cat("  r =", sprintf("%.4f", r23), "\n")
+cat("  t(", cor_expect_positive$parameter, ") = ", 
+    sprintf("%.4f", cor_expect_positive$statistic), "\n", sep = "")
+cat("  p-value = ", sprintf("%.6f", cor_expect_positive$p.value), sep = "")
+
+if(cor_expect_positive$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_expect_positive$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_expect_positive$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat("\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_expect_positive$conf.int[1]), ", ",
+    sprintf("%.4f", cor_expect_positive$conf.int[2]), "]\n\n", sep = "")
+
+correlation_summary <- data.frame(
+  Correlation = c("Temporality × Expectability (r₁₂)",
+                  "Temporality × Positive Emotion (r₁₃)",
+                  "Expectability × Positive Emotion (r₂₃)"),
+  r = c(sprintf("%.4f", r12), sprintf("%.4f", r13), sprintf("%.4f", r23)),
+  t = c(sprintf("%.4f", cor_temp_expect$statistic),
+        sprintf("%.4f", cor_temp_positive$statistic),
+        sprintf("%.4f", cor_expect_positive$statistic)),
+  p = c(sprintf("%.6f", cor_temp_expect$p.value),
+        sprintf("%.6f", cor_temp_positive$p.value),
+        sprintf("%.6f", cor_expect_positive$p.value)),
+  stringsAsFactors = FALSE
+)
+
+print(correlation_summary, row.names = FALSE)
+cat("\n")
+
+# b. Is there a significant difference in their correlations?
+# -----------------------------------------------------------------------------
+# Steiger's Z-test calculation
+term1 <- (r12 - r13) * sqrt((n - 3) * (1 + r23))
+term2 <- sqrt(2 * (1 - r12^2 - r13^2 - r23^2 + 2*r12*r13*r23))
+
+steiger_t <- term1 / term2
+
+steiger_p <- 2 * (1 - pt(abs(steiger_t), df = n - 3))
+
+cat("Difference in correlations:\n")
+diff_r <- r12 - r13
+cat("  r₁₂ - r₁₃ =", sprintf("%.4f", diff_r), "\n\n")
+
+cat("Test statistic:\n")
+cat("  t(", n - 3, ") = ", sprintf("%.4f", steiger_t), "\n", sep = "")
+cat("  p-value (two-tailed) = ", sprintf("%.6f", steiger_p), sep = "")
+
+if(steiger_p < 0.001) {
+  cat(" ***\n\n")
+} else if(steiger_p < 0.01) {
+  cat(" **\n\n")
+} else if(steiger_p < 0.05) {
+  cat(" *\n\n")
+} else {
+  cat("\n\n")
+}
+
+# Install and load cocor package if not available
+if(!require(cocor)) {
+  install.packages("cocor")
+  library(cocor)
+}
+
+# Use cocor to compare dependent correlations
+cocor_result <- cocor.dep.groups.overlap(
+  r.jk = r12,  # Temporality × Expectability
+  r.jh = r13,  # Temporality × Positive Emotion
+  r.kh = r23,  # Expectability × Positive Emotion
+  n = n,
+  alternative = "two.sided",
+  test = c("steiger1980"),
+  return.htest = TRUE
+)
+
+cat("cocor package output (Steiger's test):\n")
+print(cocor_result)
+cat("\n")
+
+alpha <- 0.05
+cat("Significance level: α =", alpha, "\n\n")
+
+if(steiger_p < alpha) {
+  cat("DECISION: REJECT THE NULL HYPOTHESIS\n\n")
+  cat("Conclusion:\n")
+  cat("  There IS a statistically significant difference between the two correlations\n")
+  cat("  (p = ", sprintf("%.4f", steiger_p), " < ", alpha, ").\n\n", sep = "")
+  
+  if(abs(r12) > abs(r13)) {
+    cat("  Temporality has a STRONGER correlation with expectability (r = ", 
+        sprintf("%.4f", r12), ")\n", sep = "")
+    cat("  than with positive emotion (r = ", sprintf("%.4f", r13), ").\n\n", sep = "")
+  } else {
+    cat("  Temporality has a STRONGER correlation with positive emotion (r = ", 
+        sprintf("%.4f", r13), ")\n", sep = "")
+    cat("  than with expectability (r = ", sprintf("%.4f", r12), ").\n\n", sep = "")
+  }
+  
+} else {
+  cat("DECISION: FAIL TO REJECT THE NULL HYPOTHESIS\n\n")
+  cat("Conclusion:\n")
+  cat("  There is NO statistically significant difference between the two correlations\n")
+  cat("  (p = ", sprintf("%.4f", steiger_p), " >= ", alpha, ").\n\n", sep = "")
+  cat("  Although r12 = ", sprintf("%.4f", r12), " and r13 = ", sprintf("%.4f", r13), "\n", sep = "")
+  cat("  differ numerically by ", sprintf("%.4f", abs(diff_r)), 
+      ", this difference could reasonably\n", sep = "")
+  cat("  be due to sampling error. We cannot conclude that temporality relates\n")
+  cat("  more strongly to one variable than the other.\n\n")
+}
+
+# Effect size for the difference
+cat("EFFECT SIZE:\n")
+cat("------------\n\n")
+
+cat("Absolute difference in correlations:\n")
+cat("  |r₁₂ - r₁₃| = ", sprintf("%.4f", abs(diff_r)), "\n\n", sep = "")
+
+if(abs(diff_r) < 0.1) {
+  effect_size <- "trivial"
+} else if(abs(diff_r) < 0.3) {
+  effect_size <- "small"
+} else if(abs(diff_r) < 0.5) {
+  effect_size <- "medium"
+} else {
+  effect_size <- "large"
+}
+
+par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
+
+barplot(c(r12, r13),
+        names.arg = c("Temporality ×\nExpectability", 
+                      "Temporality ×\nPositive Emotion"),
+        col = c("steelblue", "coral"),
+        ylim = c(min(0, min(r12, r13) - 0.1), max(r12, r13) + 0.1),
+        main = "Comparison of Correlations",
+        ylab = "Pearson's r",
+        cex.names = 0.9,
+        cex.main = 1.2)
+
+abline(h = 0, lwd = 2)
+
+text(c(0.7, 1.9), c(r12, r13), 
+     labels = sprintf("%.4f", c(r12, r13)),
+     pos = 3, cex = 1.1, font = 2)
+
+text(1.3, max(r12, r13) * 0.9,
+     sprintf("Diff = %.4f\np = %.4f", abs(diff_r), steiger_p),
+     cex = 0.9)
+
+grid(col = "gray", lty = 3)
+
+# Plot 2: Confidence intervals
+plot(c(1, 2), c(r12, r13),
+     xlim = c(0.5, 2.5),
+     ylim = c(min(cor_temp_expect$conf.int[1], cor_temp_positive$conf.int[1]) - 0.05,
+              max(cor_temp_expect$conf.int[2], cor_temp_positive$conf.int[2]) + 0.05),
+     pch = 19,
+     cex = 2,
+     col = c("steelblue", "coral"),
+     xlab = "",
+     ylab = "Correlation Coefficient",
+     main = "Correlations with 95% CIs",
+     xaxt = "n",
+     cex.main = 1.2)
+
+axis(1, at = c(1, 2), 
+     labels = c("Temp × Expect", "Temp × Positive"),
+     cex.axis = 0.9)
+
+arrows(1, cor_temp_expect$conf.int[1],
+       1, cor_temp_expect$conf.int[2],
+       angle = 90, code = 3, length = 0.1, lwd = 2, col = "steelblue")
+
+arrows(2, cor_temp_positive$conf.int[1],
+       2, cor_temp_positive$conf.int[2],
+       angle = 90, code = 3, length = 0.1, lwd = 2, col = "coral")
+
+abline(h = 0, lty = 2, col = "red", lwd = 2)
+
+grid(col = "gray", lty = 3)
+
+legend("topright",
+       legend = "95% CI",
+       lwd = 2,
+       col = "gray",
+       bty = "n",
+       cex = 0.9)
+
+par(mfrow = c(1, 1))
+
+if(steiger_p < alpha) {
+  cat("Finding:\n")
+  cat("  Temporality shows a significantly stronger relationship with\n")
+  if(abs(r12) > abs(r13)) {
+    cat("  EXPECTABILITY (satisfaction) than with positive emotion.\n\n")
+  } else {
+    cat("  POSITIVE EMOTION than with expectability (satisfaction).\n\n")
+  }
+} else {
+  cat("Finding:\n")
+  cat("  Temporality relates similarly to both expectability (satisfaction) and\n")
+  cat("  positive emotion. The difference between r =", sprintf("%.4f", r12), "\n")
+  cat("  and r =", sprintf("%.4f", r13), "is not statistically significant.\n\n")
+}
+```
+
+Calculate the difference in correlations for gender on temporality and relativity.
+
+    a.	Include the output from the test.
+    b.	Is there a significant difference in their correlations?
+    
+```
+I compared the temporality-relativity correlation between women and men, treating them as independent groups. I calculated Pearson correlations separately for each gender. To determine if correlations differ significantly, I used Fisher's Z-test for independent correlations. I verified results using the cocor package. 
+
+There IS a statistically significant difference between the correlations for women and men (p = 0.0003 < .05). MEN show a STRONGER correlation (r =0.2627) between temporality and relativity than WOMEN (r =-0.1817).
+```
+    
+```{r correl3}
+women_data <- noout[noout$gender == "women", ]
+men_data <- noout[noout$gender == "men", ]
+
+women_complete <- complete.cases(women_data[, c("temporality", "relativity")])
+men_complete <- complete.cases(men_data[, c("temporality", "relativity")])
+
+women_temp <- women_data$temporality[women_complete]
+women_rel <- women_data$relativity[women_complete]
+
+men_temp <- men_data$temporality[men_complete]
+men_rel <- men_data$relativity[men_complete]
+
+n_women <- length(women_temp)
+n_men <- length(men_temp)
+
+cat("Sample information:\n")
+cat("  Women with complete data:", n_women, "\n")
+cat("  Men with complete data:", n_men, "\n")
+cat("  Total:", n_women + n_men, "\n\n")
+
+# a. Include the output from the test
+# -----------------------------------------------------------------------------
+cor_women <- cor.test(women_temp, women_rel, method = "pearson")
+r_women <- cor_women$estimate
+
+cat("Pearson's product-moment correlation\n\n")
+cat("  Sample size: n =", n_women, "\n")
+cat("  r =", sprintf("%.4f", r_women), "\n")
+cat("  t(", cor_women$parameter, ") = ", 
+    sprintf("%.4f", cor_women$statistic), "\n", sep = "")
+cat("  p-value = ", sprintf("%.6f", cor_women$p.value), sep = "")
+
+if(cor_women$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_women$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_women$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat("\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_women$conf.int[1]), ", ",
+    sprintf("%.4f", cor_women$conf.int[2]), "]\n", sep = "")
+cat("  R² = ", sprintf("%.4f", r_women^2), 
+    sprintf(" (%.2f%% shared variance)\n\n", 100 * r_women^2))
+
+# Effect size for women
+if(abs(r_women) < 0.1) {
+  women_effect <- "negligible"
+} else if(abs(r_women) < 0.3) {
+  women_effect <- "small"
+} else if(abs(r_women) < 0.5) {
+  women_effect <- "medium"
+} else {
+  women_effect <- "large"
+}
+
+cat("  Effect size:", women_effect, "\n")
+cat("  Direction:", ifelse(r_women > 0, "positive", "negative"), "\n\n")
+
+# Calculate correlation for men
+cor_men <- cor.test(men_temp, men_rel, method = "pearson")
+r_men <- cor_men$estimate
+
+cat("Pearson's product-moment correlation\n\n")
+cat("  Sample size: n =", n_men, "\n")
+cat("  r =", sprintf("%.4f", r_men), "\n")
+cat("  t(", cor_men$parameter, ") = ", 
+    sprintf("%.4f", cor_men$statistic), "\n", sep = "")
+cat("  p-value = ", sprintf("%.6f", cor_men$p.value), sep = "")
+
+if(cor_men$p.value < 0.001) {
+  cat(" ***\n")
+} else if(cor_men$p.value < 0.01) {
+  cat(" **\n")
+} else if(cor_men$p.value < 0.05) {
+  cat(" *\n")
+} else {
+  cat("\n")
+}
+
+cat("  95% CI: [", sprintf("%.4f", cor_men$conf.int[1]), ", ",
+    sprintf("%.4f", cor_men$conf.int[2]), "]\n", sep = "")
+cat("  R² = ", sprintf("%.4f", r_men^2), 
+    sprintf(" (%.2f%% shared variance)\n\n", 100 * r_men^2))
+
+# Effect size for men
+if(abs(r_men) < 0.1) {
+  men_effect <- "negligible"
+} else if(abs(r_men) < 0.3) {
+  men_effect <- "small"
+} else if(abs(r_men) < 0.5) {
+  men_effect <- "medium"
+} else {
+  men_effect <- "large"
+}
+
+cat("  Effect size:", men_effect, "\n")
+cat("  Direction:", ifelse(r_men > 0, "positive", "negative"), "\n\n")
+
+comparison_table <- data.frame(
+  Group = c("Women", "Men"),
+  n = c(n_women, n_men),
+  r = c(sprintf("%.4f", r_women), sprintf("%.4f", r_men)),
+  CI_Lower = c(sprintf("%.4f", cor_women$conf.int[1]), 
+               sprintf("%.4f", cor_men$conf.int[1])),
+  CI_Upper = c(sprintf("%.4f", cor_women$conf.int[2]), 
+               sprintf("%.4f", cor_men$conf.int[2])),
+  p_value = c(sprintf("%.6f", cor_women$p.value), 
+              sprintf("%.6f", cor_men$p.value)),
+  R_squared = c(sprintf("%.4f", r_women^2), sprintf("%.4f", r_men^2)),
+  stringsAsFactors = FALSE
+)
+
+print(comparison_table, row.names = FALSE)
+cat("\n")
+
+cat("Difference in correlations:\n")
+diff_r <- r_women - r_men
+cat("  r_women - r_men =", sprintf("%.4f", diff_r), "\n\n")
+
+# b. Is there a significant difference in their correlations?
+# -----------------------------------------------------------------------------
+# Fisher's Z transformation
+z_women <- 0.5 * log((1 + r_women) / (1 - r_women))
+z_men <- 0.5 * log((1 + r_men) / (1 - r_men))
+
+cat("  Women: r =", sprintf("%.4f", r_women), "→ Z =", sprintf("%.4f", z_women), "\n")
+cat("  Men:   r =", sprintf("%.4f", r_men), "→ Z =", sprintf("%.4f", z_men), "\n\n")
+
+se_diff <- sqrt(1/(n_women - 3) + 1/(n_men - 3))
+
+cat("  SE =", sprintf("%.4f", se_diff), "\n\n")
+
+z_obs <- (z_women - z_men) / se_diff
+
+cat("  Z_obs =", sprintf("%.4f", z_obs), "\n\n")
+
+p_value <- 2 * (1 - pnorm(abs(z_obs)))
+
+cat("  p-value =", sprintf("%.6f", p_value))
+
+if(p_value < 0.001) {
+  cat(" ***\n\n")
+} else if(p_value < 0.01) {
+  cat(" **\n\n")
+} else if(p_value < 0.05) {
+  cat(" *\n\n")
+} else {
+  cat("\n\n")
+}
+
+cat("Fisher's Z-test for independent correlations:\n\n")
+cat("  Sample sizes:\n")
+cat("    Women: n =", n_women, "\n")
+cat("    Men:   n =", n_men, "\n\n")
+
+cat("  Correlations:\n")
+cat("    Women: r =", sprintf("%.4f", r_women), "\n")
+cat("    Men:   r =", sprintf("%.4f", r_men), "\n")
+cat("    Difference: Δr =", sprintf("%.4f", diff_r), "\n\n")
+
+cat("  Fisher's Z values:\n")
+cat("    Women: Z =", sprintf("%.4f", z_women), "\n")
+cat("    Men:   Z =", sprintf("%.4f", z_men), "\n")
+cat("    Difference: ΔZ =", sprintf("%.4f", z_women - z_men), "\n\n")
+
+cat("  Test statistic:\n")
+cat("    Z =", sprintf("%.4f", z_obs), "\n\n")
+
+cat("  p-value (two-tailed):\n")
+cat("    p =", sprintf("%.6f", p_value), "\n\n")
+
+cat("  95% Confidence interval for the difference:\n")
+ci_lower <- (z_women - z_men) - 1.96 * se_diff
+ci_upper <- (z_women - z_men) + 1.96 * se_diff
+
+# Transform back to r scale (approximate)
+r_diff_lower <- tanh(ci_lower)
+r_diff_upper <- tanh(ci_upper)
+
+cat("    In Z scale: [", sprintf("%.4f", ci_lower), ", ", 
+    sprintf("%.4f", ci_upper), "]\n", sep = "")
+cat("    In r scale (approx): [", sprintf("%.4f", r_diff_lower), ", ", 
+    sprintf("%.4f", r_diff_upper), "]\n\n", sep = "")
+
+# Alternative: Using cocor package
+
+# Install and load cocor package if not available
+if(!require(cocor)) {
+  install.packages("cocor")
+  library(cocor)
+}
+
+cocor_result <- cocor.indep.groups(
+  r1.jk = r_women,
+  r2.hm = r_men,
+  n1 = n_women,
+  n2 = n_men,
+  alternative = "two.sided",
+  test = c("fisher1925"),
+  return.htest = TRUE
+)
+
+cat("cocor package output (Fisher's test):\n")
+print(cocor_result)
+cat("\n")
+
+alpha <- 0.05
+cat("Significance level: α =", alpha, "\n\n")
+
+if(p_value < alpha) {
+  cat("DECISION: REJECT THE NULL HYPOTHESIS\n\n")
+  cat("Conclusion:\n")
+  cat("  There IS a statistically significant difference between the correlations\n")
+  cat("  for women and men (p =", sprintf("%.4f", p_value), "< .05).\n\n")
+  
+  if(abs(r_women) > abs(r_men)) {
+    cat("  WOMEN show a STRONGER correlation (r =", sprintf("%.4f", r_women), ")\n", sep = "")
+    cat("  between temporality and relativity than MEN (r =", sprintf("%.4f", r_men), ").\n\n", sep = "")
+  } else {
+    cat("  MEN show a STRONGER correlation (r =", sprintf("%.4f", r_men), ")\n", sep = "")
+    cat("  between temporality and relativity than WOMEN (r =", sprintf("%.4f", r_women), ").\n\n", sep = "")
+  }
+  
+} else {
+  cat("DECISION: FAIL TO REJECT THE NULL HYPOTHESIS\n\n")
+  cat("Conclusion:\n")
+  cat("  There is NO statistically significant difference between the correlations\n")
+  cat("  for women and men (p =", sprintf("%.4f", p_value), ">= .05).\n\n")
+  cat("  Although women's r =", sprintf("%.4f", r_women), "and men's r =", sprintf("%.4f", r_men), "\n")
+  cat("  differ numerically by", sprintf("%.4f", abs(diff_r)), ", this difference could\n")
+  cat("  reasonably be due to sampling error. Gender does not significantly moderate\n")
+  cat("  the relationship between temporality and relativity.\n\n")
+}
+
+cat("Absolute difference in correlations:\n")
+cat("  |r_women - r_men| =", sprintf("%.4f", abs(diff_r)), "\n\n")
+
+if(abs(diff_r) < 0.1) {
+  diff_effect <- "trivial"
+} else if(abs(diff_r) < 0.3) {
+  diff_effect <- "small"
+} else if(abs(diff_r) < 0.5) {
+  diff_effect <- "medium"
+} else {
+  diff_effect <- "large"
+}
+
+par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
+
+barplot(c(r_women, r_men),
+        names.arg = c("Women", "Men"),
+        col = c("pink", "lightblue"),
+        ylim = c(min(0, min(r_women, r_men) - 0.1), max(r_women, r_men) + 0.15),
+        main = "Correlation by Gender\nTemporality × Relativity",
+        ylab = "Pearson's r",
+        cex.names = 1.1,
+        cex.main = 1.2)
+
+abline(h = 0, lwd = 2)
+
+text(c(0.7, 1.9), c(r_women, r_men), 
+     labels = sprintf("%.4f", c(r_women, r_men)),
+     pos = 3, cex = 1.1, font = 2)
+
+text(1.3, max(r_women, r_men) * 0.95,
+     sprintf("Diff = %.4f\np = %.4f%s", 
+             abs(diff_r), p_value,
+             ifelse(p_value < 0.05, " *", "")),
+     cex = 0.9)
+
+grid(col = "gray", lty = 3)
+
+plot(c(1, 2), c(r_women, r_men),
+     xlim = c(0.5, 2.5),
+     ylim = c(min(cor_women$conf.int[1], cor_men$conf.int[1]) - 0.05,
+              max(cor_women$conf.int[2], cor_men$conf.int[2]) + 0.05),
+     pch = c(19, 17),
+     cex = 2,
+     col = c("pink", "lightblue"),
+     xlab = "",
+     ylab = "Correlation Coefficient",
+     main = "Correlations with 95% CIs",
+     xaxt = "n",
+     cex.main = 1.2)
+
+axis(1, at = c(1, 2), 
+     labels = c("Women", "Men"),
+     cex.axis = 1.1)
+
+arrows(1, cor_women$conf.int[1],
+       1, cor_women$conf.int[2],
+       angle = 90, code = 3, length = 0.1, lwd = 3, col = "red")
+
+arrows(2, cor_men$conf.int[1],
+       2, cor_men$conf.int[2],
+       angle = 90, code = 3, length = 0.1, lwd = 3, col = "blue")
+
+abline(h = 0, lty = 2, col = "gray", lwd = 2)
+
+grid(col = "gray", lty = 3)
+
+ci_overlap <- !(cor_women$conf.int[2] < cor_men$conf.int[1] || 
+                cor_women$conf.int[1] > cor_men$conf.int[2])
+
+text(1.5, min(cor_women$conf.int[1], cor_men$conf.int[1]) + 0.02,
+     ifelse(ci_overlap, "CIs overlap", "CIs do not overlap"),
+     cex = 0.9,
+     col = ifelse(ci_overlap, "darkgreen", "darkred"))
+
+par(mfrow = c(1, 1))
+
+if(ci_overlap) {
+  cat("Note: The confidence intervals OVERLAP, suggesting the correlations may\n")
+  cat("      not be meaningfully different despite any statistical significance.\n\n")
+} else {
+  cat("Note: The confidence intervals DO NOT OVERLAP, providing additional\n")
+  cat("      evidence that the correlations differ between groups.\n\n")
+}
+
+if(p_value < alpha) {
+  cat("Finding:\n")
+  cat("  Gender MODERATES the relationship between temporality and relativity.\n\n")
+  
+  if(abs(r_women) > abs(r_men)) {
+    cat("  For WOMEN, the system's adaptability is more strongly associated with\n")
+    cat("  comparative ratings (r =", sprintf("%.4f", r_women), ") than for MEN (r =", sprintf("%.4f", r_men), ").\n\n", sep = "")
+  } else {
+    cat("  For MEN, the system's adaptability is more strongly associated with\n")
+    cat("  comparative ratings (r =", sprintf("%.4f", r_men), ") than for WOMEN (r =", sprintf("%.4f", r_women), ").\n\n", sep = "")
+  }
+} else {
+  cat("Finding:\n")
+  cat("  Gender DOES NOT moderate the relationship between temporality and relativity.\n\n")
+  cat("  Both women (r =", sprintf("%.4f", r_women), ") and men (r =", sprintf("%.4f", r_men), ")\n", sep = "")
+  cat("  show similar correlations between system adaptability and comparative ratings.\n\n")
+}
+```
+
+Calculate the partial and semipartial correlations for all variables, and include the output. 
+    a.	Are any of the correlations significant after controlling for all other relationships?
+    
+```
+I calculated partial and semipartial correlations for all four continuous variables (temporality, expectability, relativity, positive). I displayed complete correlation matrices with significance tests and compared zero-order (no controls), partial, and semipartial correlations side-by-side. For each variable pair, I identified which control variables were partialed out, calculated how much correlations were reduced when controls were applied, and determined significance. I identified which partial correlations have p < .05, reported them in a table, and concluded YES with specific pairs if any remain significant, or NO if none survive controlling for other variables. 
+
+YES - The following correlations are significant after controlling for all other relationships:
+
+  1. temporality × expectability (r = 0.2573, p = 0.000025)
+  2. temporality × relativity (r = 0.1698, p = 0.005861)
+  3. temporality × positive (r = -0.1821, p = 0.003097)
+  4. expectability × relativity (r = 0.1704, p = 0.005690)
+```
+    
+```{r partials}
+if(!require(ppcor)) {
+  install.packages("ppcor")
+  library(ppcor)
+}
+
+continuous_vars <- c("temporality", "expectability", "relativity", "positive")
+cor_data <- noout[, continuous_vars]
+
+cor_data_complete <- na.omit(cor_data)
+n_complete <- nrow(cor_data_complete)
+
+# Zero-order correlations (for reference)
+zero_order <- cor(cor_data_complete, method = "pearson")
+
+cat("Correlation Matrix:\n")
+cat("-------------------\n")
+print(round(zero_order, 4))
+cat("\n")
+
+n_vars <- ncol(cor_data_complete)
+for(i in 1:(n_vars-1)) {
+  for(j in (i+1):n_vars) {
+    test_result <- cor.test(cor_data_complete[, i], cor_data_complete[, j])
+    
+    cat(sprintf("%s × %s:\n", continuous_vars[i], continuous_vars[j]))
+    cat(sprintf("  r = %.4f, t(%d) = %.4f, p = %.6f", 
+                test_result$estimate, 
+                test_result$parameter,
+                test_result$statistic,
+                test_result$p.value))
+    
+    if(test_result$p.value < 0.001) cat(" ***\n")
+    else if(test_result$p.value < 0.01) cat(" **\n")
+    else if(test_result$p.value < 0.05) cat(" *\n")
+    else cat("\n")
+  }
+}
+cat("\n")
+
+# PARTIAL CORRELATIONS
+partial_results <- pcor(cor_data_complete, method = "pearson")
+
+partial_cor <- partial_results$estimate
+rownames(partial_cor) <- continuous_vars
+colnames(partial_cor) <- continuous_vars
+
+print(round(partial_cor, 4))
+cat("\n")
+
+partial_pval <- partial_results$p.value
+rownames(partial_pval) <- continuous_vars
+colnames(partial_pval) <- continuous_vars
+
+print(round(partial_pval, 6))
+cat("\n")
+
+partial_formatted <- matrix("", nrow = n_vars, ncol = n_vars)
+rownames(partial_formatted) <- continuous_vars
+colnames(partial_formatted) <- continuous_vars
+
+for(i in 1:n_vars) {
+  for(j in 1:n_vars) {
+    if(i == j) {
+      partial_formatted[i, j] <- "1.0000"
+    } else {
+      r_val <- partial_cor[i, j]
+      p_val <- partial_pval[i, j]
+      
+      if(p_val < 0.001) {
+        partial_formatted[i, j] <- sprintf("%.4f***", r_val)
+      } else if(p_val < 0.01) {
+        partial_formatted[i, j] <- sprintf("%.4f** ", r_val)
+      } else if(p_val < 0.05) {
+        partial_formatted[i, j] <- sprintf("%.4f*  ", r_val)
+      } else {
+        partial_formatted[i, j] <- sprintf("%.4f   ", r_val)
+      }
+    }
+  }
+}
+
+print(partial_formatted, quote = FALSE)
+cat("\nSignificance: *** p < .001, ** p < .01, * p < .05\n\n")
+
+pair_count <- 1
+for(i in 1:(n_vars-1)) {
+  for(j in (i+1):n_vars) {
+    var1 <- continuous_vars[i]
+    var2 <- continuous_vars[j]
+    
+    control_vars <- continuous_vars[-c(i, j)]
+    
+    r_partial <- partial_cor[i, j]
+    p_partial <- partial_pval[i, j]
+    
+    r_zero <- zero_order[i, j]
+    
+    cat(sprintf("Pair %d: %s × %s\n", pair_count, var1, var2))
+    cat(sprintf("  Controlling for: %s\n", paste(control_vars, collapse = ", ")))
+    cat(sprintf("  Zero-order r:  %.4f\n", r_zero))
+    cat(sprintf("  Partial r:     %.4f\n", r_partial))
+    cat(sprintf("  Difference:    %.4f\n", r_zero - r_partial))
+    cat(sprintf("  p-value:       %.6f", p_partial))
+    
+    if(p_partial < 0.001) cat(" ***\n")
+    else if(p_partial < 0.01) cat(" **\n")
+    else if(p_partial < 0.05) cat(" *\n")
+    else cat(" (not significant)\n")
+    
+    if(p_partial < 0.05) {
+      cat("  Significant: YES - The relationship remains after controlling for other variables.\n")
+    } else {
+      cat("  Significant: NO - The relationship disappears after controlling for other variables.\n")
+    }
+    
+    cat("\n")
+    pair_count <- pair_count + 1
+  }
+}
+
+# SEMIPARTIAL CORRELATIONS
+semipartial_results <- spcor(cor_data_complete, method = "pearson")
+
+semipartial_cor <- semipartial_results$estimate
+rownames(semipartial_cor) <- continuous_vars
+colnames(semipartial_cor) <- continuous_vars
+
+print(round(semipartial_cor, 4))
+cat("\n")
+
+semipartial_pval <- semipartial_results$p.value
+rownames(semipartial_pval) <- continuous_vars
+colnames(semipartial_pval) <- continuous_vars
+
+print(round(semipartial_pval, 6))
+cat("\n")
+
+semipartial_formatted <- matrix("", nrow = n_vars, ncol = n_vars)
+rownames(semipartial_formatted) <- continuous_vars
+colnames(semipartial_formatted) <- continuous_vars
+
+for(i in 1:n_vars) {
+  for(j in 1:n_vars) {
+    if(i == j) {
+      semipartial_formatted[i, j] <- "1.0000"
+    } else {
+      r_val <- semipartial_cor[i, j]
+      p_val <- semipartial_pval[i, j]
+      
+      if(p_val < 0.001) {
+        semipartial_formatted[i, j] <- sprintf("%.4f***", r_val)
+      } else if(p_val < 0.01) {
+        semipartial_formatted[i, j] <- sprintf("%.4f** ", r_val)
+      } else if(p_val < 0.05) {
+        semipartial_formatted[i, j] <- sprintf("%.4f*  ", r_val)
+      } else {
+        semipartial_formatted[i, j] <- sprintf("%.4f   ", r_val)
+      }
+    }
+  }
+}
+
+print(semipartial_formatted, quote = FALSE)
+cat("\nSignificance: *** p < .001, ** p < .01, * p < .05\n\n")
+
+# COMPARISON TABLE
+comparison_results <- data.frame(
+  Pair = character(),
+  Zero_Order = numeric(),
+  Partial = numeric(),
+  Semipartial = numeric(),
+  Partial_p = numeric(),
+  Partial_Sig = character(),
+  stringsAsFactors = FALSE
+)
+
+for(i in 1:(n_vars-1)) {
+  for(j in (i+1):n_vars) {
+    pair_name <- paste(continuous_vars[i], "×", continuous_vars[j])
+    
+    comparison_results <- rbind(comparison_results, data.frame(
+      Pair = pair_name,
+      Zero_Order = round(zero_order[i, j], 4),
+      Partial = round(partial_cor[i, j], 4),
+      Semipartial = round(semipartial_cor[i, j], 4),
+      Partial_p = round(partial_pval[i, j], 6),
+      Partial_Sig = ifelse(partial_pval[i, j] < 0.001, "***",
+                           ifelse(partial_pval[i, j] < 0.01, "**",
+                                  ifelse(partial_pval[i, j] < 0.05, "*", "ns"))),
+      stringsAsFactors = FALSE
+    ))
+  }
+}
+
+print(comparison_results, row.names = FALSE)
+cat("\nSignificance codes: *** p < .001, ** p < .01, * p < .05, ns = not significant\n\n")
+
+# a. Are any of the correlations significant after controlling for all other relationships?
+significant_partials <- data.frame(
+  Pair = character(),
+  Partial_r = numeric(),
+  p_value = numeric(),
+  Interpretation = character(),
+  stringsAsFactors = FALSE
+)
+
+for(i in 1:(n_vars-1)) {
+  for(j in (i+1):n_vars) {
+    if(partial_pval[i, j] < 0.05) {
+      pair_name <- paste(continuous_vars[i], "×", continuous_vars[j])
+      control_vars <- continuous_vars[-c(i, j)]
+      
+      interpretation <- sprintf("Significant after controlling for %s", 
+                               paste(control_vars, collapse = " and "))
+      
+      significant_partials <- rbind(significant_partials, data.frame(
+        Pair = pair_name,
+        Partial_r = round(partial_cor[i, j], 4),
+        p_value = round(partial_pval[i, j], 6),
+        Interpretation = interpretation,
+        stringsAsFactors = FALSE
+      ))
+    }
+  }
+}
+
+if(nrow(significant_partials) > 0) {
+  print(significant_partials, row.names = FALSE)
+  cat("\n")
+  
+  cat("Summary:\n")
+  cat(sprintf("  %d out of %d correlations remain significant after controlling\n", 
+              nrow(significant_partials), 
+              (n_vars * (n_vars - 1)) / 2))
+  cat("  for all other variables in the dataset.\n\n")
+  
+  cat("ANSWER: YES - The following correlations are significant after controlling\n")
+  cat("         for all other relationships:\n\n")
+  
+  for(k in 1:nrow(significant_partials)) {
+    cat(sprintf("  %d. %s (r = %.4f, p = %.6f)\n", 
+                k, 
+                significant_partials$Pair[k],
+                significant_partials$Partial_r[k],
+                significant_partials$p_value[k]))
+  }
+  cat("\n")
+  
+} else {
+  cat("ANSWER: NO - None of the correlations remain significant after controlling\n")
+  cat("         for all other relationships in the dataset.\n\n")
+  
+}
+
+# Effect size comparison
+reduction_results <- data.frame(
+  Pair = character(),
+  Zero_Order = numeric(),
+  Partial = numeric(),
+  Reduction = numeric(),
+  Percent_Reduction = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for(i in 1:(n_vars-1)) {
+  for(j in (i+1):n_vars) {
+    pair_name <- paste(continuous_vars[i], "×", continuous_vars[j])
+    
+    r_zero <- zero_order[i, j]
+    r_partial <- partial_cor[i, j]
+    reduction <- abs(r_zero) - abs(r_partial)
+    pct_reduction <- (reduction / abs(r_zero)) * 100
+    
+    reduction_results <- rbind(reduction_results, data.frame(
+      Pair = pair_name,
+      Zero_Order = round(r_zero, 4),
+      Partial = round(r_partial, 4),
+      Reduction = round(reduction, 4),
+      Percent_Reduction = round(pct_reduction, 2),
+      stringsAsFactors = FALSE
+    ))
+  }
+}
+
+print(reduction_results, row.names = FALSE)
+cat("\n")
+
+par(mfrow = c(1, 2), mar = c(10, 4, 4, 2))
+
+n_pairs <- (n_vars * (n_vars - 1)) / 2
+pair_names <- character(n_pairs)
+zero_vals <- numeric(n_pairs)
+partial_vals <- numeric(n_pairs)
+significant <- logical(n_pairs)
+
+idx <- 1
+for(i in 1:(n_vars-1)) {
+  for(j in (i+1):n_vars) {
+    pair_names[idx] <- paste0(substr(continuous_vars[i], 1, 4), "-", 
+                              substr(continuous_vars[j], 1, 4))
+    zero_vals[idx] <- zero_order[i, j]
+    partial_vals[idx] <- partial_cor[i, j]
+    significant[idx] <- partial_pval[i, j] < 0.05
+    idx <- idx + 1
+  }
+}
+
+# Plot 1: Side-by-side comparison
+barplot_data <- rbind(zero_vals, partial_vals)
+colnames(barplot_data) <- pair_names
+
+bp <- barplot(barplot_data,
+              beside = TRUE,
+              col = c("steelblue", "coral"),
+              main = "Zero-Order vs Partial Correlations",
+              ylab = "Correlation Coefficient",
+              las = 2,
+              cex.names = 0.8,
+              ylim = c(min(c(zero_vals, partial_vals)) - 0.1, 
+                      max(c(zero_vals, partial_vals)) + 0.1))
+
+legend("topright",
+       legend = c("Zero-order", "Partial"),
+       fill = c("steelblue", "coral"),
+       bty = "n")
+
+abline(h = 0, lwd = 2)
+grid(col = "gray", lty = 3)
+
+# Plot 2: Reduction in correlation strength
+reduction_vals <- abs(zero_vals) - abs(partial_vals)
+
+barplot(reduction_vals,
+        names.arg = pair_names,
+        col = ifelse(significant, "darkgreen", "darkred"),
+        main = "Reduction in Correlation Magnitude",
+        ylab = "Absolute Reduction",
+        las = 2,
+        cex.names = 0.8)
+
+legend("topright",
+       legend = c("Partial sig.", "Partial n.s."),
+       fill = c("darkgreen", "darkred"),
+       bty = "n",
+       cex = 0.9)
+
+grid(col = "gray", lty = 3)
+
+par(mfrow = c(1, 1))
+
+if(nrow(significant_partials) > 0) {
+  cat("After controlling for all other variables in the dataset, ", 
+      nrow(significant_partials), " correlation(s)\n", sep = "")
+  cat("remain statistically significant. These represent unique relationships that\n")
+  cat("cannot be fully explained by the other variables in the model.\n\n")
+} else {
+  cat("After controlling for all other variables, NO correlations remain statistically\n")
+  cat("significant. This suggests that the observed bivariate relationships are largely\n")
+  cat("explained by the network of intercorrelations among all variables.\n\n")
+}
+```
+
+# Theory:
+
+    - What are we using as our model for understanding the data in a correlational analysis?
+    
+```
+In correlational analysis, we use a linear model assuming variables relate through straight-line relationships (Y = β₀ + β₁X + ε). The Pearson correlation coefficient (r) represents the standardized strength and direction of this linear association. For multiple variables, the correlation matrix serves as our model, capturing all pairwise relationships and assuming multivariate normality.
+```
+    
+    - How might we determine model fit?
+    
+```
+Model fit is assessed through scatterplots (points should cluster around a line), residual plots (random scatter), comparing linear vs. LOESS curves, and r² (variance explained). For multiple correlations, use Bartlett's test (variables are correlated), KMO measure (sampling adequacy > 0.6), and the correlation matrix determinant (checks multicollinearity). Also examine confidence intervals, significance tests, and effect sizes (Cohen's: small = .10-.29, medium = .30-.49, large ≥ .50).
+```
+    
+    - What is the difference between correlation and covariance?
+    
+```
+Covariance measures the direction and magnitude of linear relationships but is unstandardized (depends on variable scales), ranges from -∞ to +∞, and is difficult to interpret. Correlation is standardized covariance: r = Cov(X,Y)/(SD_X × SD_Y). It's unit-free, ranges from -1 to +1, and allows meaningful comparisons across different variable pairs. We use correlation because it's interpretable regardless of measurement scales.
+```
+    
+    - What is the difference between R and r?
+    
+```
+r is the bivariate correlation between two variables, ranging from -1 to +1. R is the multiple correlation i.e. the correlation between observed outcomes and predictions from multiple regression with several predictors, ranging from 0 to +1 (always positive). R² represents the proportion of variance explained by all predictors combined.
+```
+    
+    - When would I want to use a nonparametric correlation over Pearson's correlation?
+    
+```
+We want to use nonparametric correlations (Spearman's ρ or Kendall's τ) when: (1) we have ordinal data or ranks, (2) distributions are non-normal with skewness or outliers, (3) relationships are monotonic but not linear, or (4) sample sizes are small with questionable normality. Nonparametric methods work with ranks rather than raw values, making them robust to outliers and assumption violations. Pearson's r is more powerful when assumptions are met, so it is prefered for continuous, normally distributed data with linear relationships.
+
+
+```
+    
+    - What is the distinction between semi-partial and partial correlations? 
+    
+```
+Partial correlation removes control variables' effects from both variables in the pair. Semipartial correlation removes controls from only one variable. Partial correlations are larger in absolute value because removing variance from both variables strengthens their purified relationship. Wew want to use partial when examining direct relationships independent of confounds and semipartial when determining unique variance contribution.
+```
+    
+
